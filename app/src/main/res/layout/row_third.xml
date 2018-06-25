@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical" >
+
+    <TextView
+        android:id="@+id/lblListUbicacion"
+        android:layout_width="fill_parent"
+        android:background="@color/success"
+        android:layout_height="wrap_content"
+        android:textSize="17sp"
+        android:textColor="@color/black"
+        android:paddingTop="5sp"
+        android:paddingBottom="5sp"
+        android:paddingStart="?android:attr/expandableListPreferredChildPaddingLeft"
+        tools:ignore="RtlSymmetry" />
+
+</LinearLayout>

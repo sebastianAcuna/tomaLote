@@ -1,0 +1,101 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 1,
+    "identityHash": "4c18f46d5c88ef4a098db2b428f1ef1d",
+    "entities": [
+      {
+        "tableName": "ubicacion",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id_ubicacion` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `descripcion_ubicacion` TEXT)",
+        "fields": [
+          {
+            "fieldPath": "idUbicacion",
+            "columnName": "id_ubicacion",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "DescripcionUbicacion",
+            "columnName": "descripcion_ubicacion",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "id_ubicacion"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "lotes",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id_lote` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `fecha_inventario` TEXT, `usuario_inventario` TEXT, `id_ubicacion_lote` INTEGER NOT NULL, `desc_ubicacion_lote` TEXT, `calle` INTEGER NOT NULL, `lote` TEXT, `estado` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "idLotes",
+            "columnName": "id_lote",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fechaInventario",
+            "columnName": "fecha_inventario",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "usuarioInventario",
+            "columnName": "usuario_inventario",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "idUbicacionLote",
+            "columnName": "id_ubicacion_lote",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "descUbicacionLote",
+            "columnName": "desc_ubicacion_lote",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "calle",
+            "columnName": "calle",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lote",
+            "columnName": "lote",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "estado",
+            "columnName": "estado",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "id_lote"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [],
+        "foreignKeys": []
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, \"4c18f46d5c88ef4a098db2b428f1ef1d\")"
+    ]
+  }
+}

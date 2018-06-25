@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#3F51B5</color>
+    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorAccent">#FF4081</color>
+    <color name="whiteText">#FFF</color>
+    <color name="transparentBlack">#80000000</color>
+    <color name="lightBlack">#595757</color>
+    <color name="black">#000</color>
+    <color name="boneWhite">#dfeae9</color>
+
+    <!--LABEL DE ALERTA-->
+    <color name="success">#22C500</color>
+    <color name="danger">#EC0000</color>
+    <color name="warning">#ECA000</color>
+
+
+
+</resources>

@@ -1,0 +1,61 @@
+<resources>
+    <string name="app_name">Inventario de Lotes</string>
+
+
+
+
+    <string name="header_image_description">Imagen de fondo</string>
+
+
+    <string name="left_menu_home">Inicio</string>
+    <string name="left_menu_add">Agregar Lote </string>
+    <string name="left_menu_list">Listar Lotes</string>
+    <string name="left_menu_mant">Mantenedor de Ubicación</string>
+    <string name="left_menu_sub_item">Configuración</string>
+
+    
+    
+
+
+
+
+    <!-- HOME FRAGMENT-->
+    <!--================================================================-->
+    <string name="lbl_title_home_fragment" > Total Registros </string>
+    <string name="btn_subir_lotes_home_fragment" > subir registros </string>
+    <!--================================================================-->
+
+    <!-- TOMA LECTURA FRAGMENT-->
+    <!--================================================================-->
+    <!--MENSAJES DE ESTADO EN LBL-->
+    <string name="mnsj_lbl_success" > OK! </string>
+    <string name="mnsj_lbl_warning" > REPETIDO ! </string>
+    <string name="mnsj_lbl_danger" > ERROR! </string>
+
+    <!--HINT DE EDIT TEXT-->
+    <string name="hint_lbl_fecha" > Fecha </string>
+    <string name="hint_lbl_usuario" > Usuario </string>
+    <string name="hint_lbl_calle" > Calle </string>
+    <string name="hint_lbl_lote" > Lote </string>
+
+    <!--================================================================-->
+
+
+
+    <!--MANTENEDOR UBICACION FRAGMENT-->
+    <!--================================================================-->
+    <!-- HINT EDIT TEXT-->
+    <string name="hint_lbl_ubicacion_mant" > Ingrese la ubicación </string>
+
+
+    <!--MANTENEDOR UBICACION LAYOUT-->
+    <string name="editIcon" > Editar elemento </string>
+
+
+    <!--ALERTS DELETE-->
+    <string name="lblDelete" > ¿ Esta usted seguro que desea ELIMINAR esta ubicacion ?</string>
+
+
+    <!--================================================================-->
+
+</resources>
