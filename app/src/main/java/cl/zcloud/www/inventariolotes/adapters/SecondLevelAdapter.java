@@ -1,14 +1,12 @@
 package cl.zcloud.www.inventariolotes.adapters;
 
 import android.content.Context;
-import android.graphics.Typeface;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.TextView;
 
-import java.util.HashMap;
 import java.util.List;
 
 import cl.zcloud.www.inventariolotes.R;
@@ -51,7 +49,7 @@ public class SecondLevelAdapter extends BaseExpandableListAdapter {
 
 
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        convertView = inflater.inflate(R.layout.row_second, null);
+        convertView = inflater.inflate(R.layout.list_second_level, null);
         TextView text = (TextView) convertView.findViewById(R.id.lblListFecha);
         String groupText = getGroup(groupPosition).toString();
         text.setText(groupText);
@@ -79,7 +77,7 @@ public class SecondLevelAdapter extends BaseExpandableListAdapter {
     public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
 
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        convertView = inflater.inflate(R.layout.row_third, null);
+        convertView = inflater.inflate(R.layout.list_fourth_level, null);
 
         TextView textView = (TextView) convertView.findViewById(R.id.lblListUbicacion);
 

@@ -11,29 +11,30 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 
 import cl.zcloud.www.inventariolotes.R;
-import cl.zcloud.www.inventariolotes.clases.Lotes;
 
 public class AdaptadorListaPrimerNivel extends BaseExpandableListAdapter {
 
     private Context _context;
-    private List<String> _listDataHeader; // header titles
+    private List<String> _listDataHeader; // header titles //fechas
     // child data in format of header title, child title
-    private HashMap<String, List<String>> _listSecondLevel;
-    private HashMap<String, List<String>> _listThirdLevel;
+    private HashMap<String, List<String>> _listSecondLevel; //ubicaciones
+    private HashMap<String, List<String>> _listThirdLevel; //calles
+    private HashMap<String, List<String>> _listFourthLevel; //lotes
 
 
     public AdaptadorListaPrimerNivel(Context context,
                                      List<String> listDataHeader,
                                      HashMap<String, List<String>> listChildData,
-                                     HashMap<String, List<String>>_listThirdLevel) {
+                                     HashMap<String, List<String>>_listThirdLevel,
+                                     HashMap<String, List<String>>_listFourthLevel) {
         this._context = context;
         this._listDataHeader = listDataHeader;
         this._listSecondLevel = listChildData;
         this._listThirdLevel = _listThirdLevel;
+        this._listFourthLevel = _listFourthLevel;
     }
 
     @Override
@@ -51,12 +52,11 @@ public class AdaptadorListaPrimerNivel extends BaseExpandableListAdapter {
 
         final SecondLevelExpandableListView adapterLevel2 = new SecondLevelExpandableListView(_context);
 
-//        List<String> dataTercerLevel = new ArrayList<>();
-//        HashMap<String, List<String>> secondLevelData= _listThirdLevel.get(childPosition);
+        ArrayList<String> chilldd = new ArrayList<>();
+        chilldd.add(getChild(groupPosition,childPosition).toString());
 
-        adapterLevel2.setAdapter(new AdaptadorListaSegundoNivel(_context, _listSecondLevel.get(_listDataHeader.get(groupPosition)) , _listThirdLevel));
+        adapterLevel2.setAdapter(new AdaptadorListaSegundoNivel(_context, chilldd , _listThirdLevel, _listFourthLevel));
         adapterLevel2.setGroupIndicator(null);
-
 
         adapterLevel2.setOnGroupExpandListener(new ExpandableListView.OnGroupExpandListener() {
             int previousGroup = -1;
@@ -76,7 +76,7 @@ public class AdaptadorListaPrimerNivel extends BaseExpandableListAdapter {
         if (convertView == null) {
             LayoutInflater infalInflater = (LayoutInflater) this._context
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            convertView = infalInflater.inflate(R.layout.row_second, null);
+            convertView = infalInflater.inflate(R.layout.list_second_level, null);
         }
 
         TextView txtListChild = (TextView) convertView
@@ -114,7 +114,7 @@ public class AdaptadorListaPrimerNivel extends BaseExpandableListAdapter {
         if (convertView == null) {
             LayoutInflater infalInflater = (LayoutInflater) this._context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             if (infalInflater != null) {
-                convertView = infalInflater.inflate(R.layout.list_groups, null);
+                convertView = infalInflater.inflate(R.layout.list_first_level, null);
             }
         }
 

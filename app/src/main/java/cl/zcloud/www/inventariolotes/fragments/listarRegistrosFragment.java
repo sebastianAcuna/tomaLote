@@ -30,6 +30,7 @@ public class listarRegistrosFragment extends Fragment {
     ArrayList<String> listDataHeader;
     HashMap<String, List<String>> listDataUbicacion;
     HashMap<String, List<String>> listDataChild;
+    HashMap<String, List<String>> listDataCalles;
 
 
 //    List<String[]> secondLevel = new ArrayList<>();
@@ -57,7 +58,7 @@ public class listarRegistrosFragment extends Fragment {
         // parent adapter
 //        ThreeLevelListAdapter threeLevelListAdapterAdapter = new ThreeLevelListAdapter(getActivity(), parent, secondLevel, data);
 
-        listAdapter = new AdaptadorListaPrimerNivel(getActivity(), listDataHeader, listDataUbicacion,listDataChild);
+        listAdapter = new AdaptadorListaPrimerNivel(getActivity(), listDataHeader, listDataUbicacion, listDataCalles, listDataChild);
 
         // set adapter
         expandableListView.setAdapter( listAdapter );
@@ -100,38 +101,60 @@ public class listarRegistrosFragment extends Fragment {
 
 
         List<String> listaFechas = MainActivity.myAppDB.myDao().getFechasLotes();
-        List<String> listaLotes = null;
-        List<String> listaUbicaciones = null;
+        List<String> listaLotes;
+        List<String> listaUbicaciones;
+        List<Integer> listaCalles = null;
 
 
         listDataHeader = new ArrayList<>();
         listDataUbicacion = new HashMap<>();
         listDataChild = new HashMap<>();
+        listDataCalles = new HashMap<>();
 
         if (listaFechas.size() > 0){
 
             for (String fechas : listaFechas){
                 listDataHeader.add(fechas);
-
+                System.out.println("SE INSERTAN FECHAS " + fechas);
 
                 listaUbicaciones = MainActivity.myAppDB.myDao().getUbicacionesLotesByFecha(fechas);
                 if (listaUbicaciones.size() > 0){
 
+                    ArrayList<String> fechaUbi = new ArrayList<>();
+                    for (String ubicaciones : listaUbicaciones) {
+                        fechaUbi.add(fechas + "_" + ubicaciones);
+                    }
+
+
+                    listDataUbicacion.put(fechas, fechaUbi);
+                    System.out.println("lista ubicaciones " + listDataUbicacion.values().toString());
 
                     for (String ubicaciones : listaUbicaciones){
 
-//                    for (int i = 0; i < listaUbicaciones.size();i++){
+                        listaCalles = MainActivity.myAppDB.myDao().getLotesByFechaAndUbicacion(fechas,ubicaciones);
 
-                        listDataUbicacion.put(fechas, listaUbicaciones);
-                        listaLotes = MainActivity.myAppDB.myDao().getLotesByFechaAndUbicacion(fechas, ubicaciones);
+                        if (listaCalles.size() > 0){
+                            ArrayList<String> ubiCalle = new ArrayList<>();
+                            for (Integer calles : listaCalles){
+                                ubiCalle.add(ubicaciones+"_"+calles);
+                            }
 
 
+                            listDataCalles.put(fechas + "_" + ubicaciones, ubiCalle);
+                            for (Integer calles : listaCalles){
+                                System.out.println("SE INSERTAN CALLES " + calles);
 
-                        for (int  e = 0 ; e < listaLotes.size(); e++){
+                                listaLotes = MainActivity.myAppDB.myDao().getLotesByFechaUbicacionAndCalle(fechas, ubicaciones,calles);
+                                for (int  e = 0 ; e < listaLotes.size(); e++){
+                                    listDataChild.put(ubicaciones + "_" + calles, listaLotes);
+                                    System.out.println("SE INSERTAN lotes " + listaLotes.get(e));
+                                }
 
-                            listDataChild.put(fechas+"_"+ubicaciones, listaLotes);
+                            }
 
                         }
+//                    for (int i = 0; i < listaUbicaciones.size();i++){
+
                     }
 
                    /* for (String ubicacion : listaUbicaciones){

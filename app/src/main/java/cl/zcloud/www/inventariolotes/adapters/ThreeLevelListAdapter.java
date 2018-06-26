@@ -82,7 +82,7 @@ public class ThreeLevelListAdapter extends BaseExpandableListAdapter {
     public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
 
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        convertView = inflater.inflate(R.layout.list_groups, null);
+        convertView = inflater.inflate(R.layout.list_first_level, null);
         TextView text = (TextView) convertView.findViewById(R.id.lblListHeader);
         text.setText(this.parentHeaders[groupPosition]);
 
