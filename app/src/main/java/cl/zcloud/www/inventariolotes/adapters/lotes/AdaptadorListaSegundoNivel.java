@@ -55,7 +55,7 @@ public class AdaptadorListaSegundoNivel extends BaseExpandableListAdapter {
 
     @Override
     public Object getChild(int groupPosition, int childPosition) {
-        return _child.get(childPosition);
+        return _child.get(_headers.get(groupPosition)).get(childPosition);
     }
 
     @Override
@@ -72,7 +72,7 @@ public class AdaptadorListaSegundoNivel extends BaseExpandableListAdapter {
 
         TextView textView =  convertView.findViewById(R.id.lblListUbicacion);
 
-        String childArray =  _child.values().toString();
+        String childArray = (String) getChild(groupPosition,childPosition);
 
         textView.setText(childArray);
 
@@ -81,12 +81,12 @@ public class AdaptadorListaSegundoNivel extends BaseExpandableListAdapter {
 
     @Override
     public int getChildrenCount(int groupPosition) {
-        return this._child.size();
+        return this._child.get(_headers.get(groupPosition)).size();
     }
 
     @Override
     public boolean hasStableIds() {
-        return true;
+        return false;
     }
 
     @Override

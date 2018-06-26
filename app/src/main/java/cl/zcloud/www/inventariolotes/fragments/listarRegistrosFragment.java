@@ -28,7 +28,7 @@ public class listarRegistrosFragment extends Fragment {
     ExpandableListView expandableListView;
     AdaptadorListaPrimerNivel listAdapter;
     ArrayList<String> listDataHeader;
-    ArrayList<String> listDataUbicacion;
+    HashMap<String, List<String>> listDataUbicacion;
     HashMap<String, List<String>> listDataChild;
 
 
@@ -105,36 +105,34 @@ public class listarRegistrosFragment extends Fragment {
 
 
         listDataHeader = new ArrayList<>();
+        listDataUbicacion = new HashMap<>();
+        listDataChild = new HashMap<>();
 
         if (listaFechas.size() > 0){
-            listDataHeader.addAll(listaFechas);
 
             for (String fechas : listaFechas){
+                listDataHeader.add(fechas);
+
+
                 listaUbicaciones = MainActivity.myAppDB.myDao().getUbicacionesLotesByFecha(fechas);
-
-
                 if (listaUbicaciones.size() > 0){
 
 
-//                    for (String ubicaciones : listaUbicaciones){
+                    for (String ubicaciones : listaUbicaciones){
 
-                    for (int i = 0; i < listaUbicaciones.size();i++){
-                        listDataUbicacion = new ArrayList<>();
-                        listDataUbicacion.addAll(listaUbicaciones);
-                        listaLotes = MainActivity.myAppDB.myDao().getLotesByFechaAndUbicacion(fechas, listaUbicaciones.get(i));
+//                    for (int i = 0; i < listaUbicaciones.size();i++){
 
-                        listDataChild = new HashMap<>();
-                        listDataChild.put(listaUbicaciones.get(i), listaLotes);
-//                        for (int  e = 0 ; e < listaLotes.size(); e++){
+                        listDataUbicacion.put(fechas, listaUbicaciones);
+                        listaLotes = MainActivity.myAppDB.myDao().getLotesByFechaAndUbicacion(fechas, ubicaciones);
 
-//                            System.out.println(listaLotes.get(i));
 
-//                        }
+
+                        for (int  e = 0 ; e < listaLotes.size(); e++){
+
+                            listDataChild.put(fechas+"_"+ubicaciones, listaLotes);
+
+                        }
                     }
-//                    if (listaLotes != null && listaLotes.size() > 0){
-//
-//                    }
-
 
                    /* for (String ubicacion : listaUbicaciones){
 
