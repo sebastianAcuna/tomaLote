@@ -22,13 +22,13 @@ public class AdaptadorListaPrimerNivel extends BaseExpandableListAdapter {
     private Context _context;
     private List<String> _listDataHeader; // header titles
     // child data in format of header title, child title
-    private List<String> _listSecondLevel;
+    private HashMap<String, List<String>> _listSecondLevel;
     private HashMap<String, List<String>> _listThirdLevel;
 
 
     public AdaptadorListaPrimerNivel(Context context,
                                      List<String> listDataHeader,
-                                     List<String> listChildData,
+                                     HashMap<String, List<String>> listChildData,
                                      HashMap<String, List<String>>_listThirdLevel) {
         this._context = context;
         this._listDataHeader = listDataHeader;
@@ -38,7 +38,7 @@ public class AdaptadorListaPrimerNivel extends BaseExpandableListAdapter {
 
     @Override
     public Object getChild(int groupPosition, int childPosititon) {
-        return this._listSecondLevel.get(groupPosition);
+        return this._listSecondLevel.get(_listDataHeader.get(groupPosition)).get(childPosititon);
     }
 
     @Override
@@ -54,7 +54,7 @@ public class AdaptadorListaPrimerNivel extends BaseExpandableListAdapter {
 //        List<String> dataTercerLevel = new ArrayList<>();
 //        HashMap<String, List<String>> secondLevelData= _listThirdLevel.get(childPosition);
 
-        adapterLevel2.setAdapter(new AdaptadorListaSegundoNivel(_context, _listSecondLevel , _listThirdLevel));
+        adapterLevel2.setAdapter(new AdaptadorListaSegundoNivel(_context, _listSecondLevel.get(_listDataHeader.get(groupPosition)) , _listThirdLevel));
         adapterLevel2.setGroupIndicator(null);
 
 
@@ -88,7 +88,7 @@ public class AdaptadorListaPrimerNivel extends BaseExpandableListAdapter {
 
     @Override
     public int getChildrenCount(int groupPosition) {
-        return this._listSecondLevel.size();
+        return this._listSecondLevel.get(_listDataHeader.get(groupPosition)).size();
     }
 
     @Override
@@ -96,6 +96,7 @@ public class AdaptadorListaPrimerNivel extends BaseExpandableListAdapter {
         return this._listDataHeader.get(groupPosition);
     }
 
+    //cantidad de padres
     @Override
     public int getGroupCount() {
         return this._listDataHeader.size();
@@ -107,29 +108,22 @@ public class AdaptadorListaPrimerNivel extends BaseExpandableListAdapter {
     }
 
     @Override
-    public View getGroupView(int groupPosition, boolean isExpanded,
-                             View convertView, ViewGroup parent) {
+    public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
 
         String headerTitle = (String) getGroup(groupPosition);
         if (convertView == null) {
-            LayoutInflater infalInflater = (LayoutInflater) this._context
-                    .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            LayoutInflater infalInflater = (LayoutInflater) this._context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             if (infalInflater != null) {
                 convertView = infalInflater.inflate(R.layout.list_groups, null);
             }
         }
 
-        TextView lblListHeader = null;
-        if (convertView != null) {
-            lblListHeader = (TextView) convertView
-                    .findViewById(R.id.lblListHeader);
-        }
+        TextView lblListHeader  = (TextView) convertView.findViewById(R.id.lblListHeader);
         if (lblListHeader != null) {
             lblListHeader.setTypeface(null, Typeface.BOLD);
-        }
-        if (lblListHeader != null) {
             lblListHeader.setText(headerTitle);
         }
+
 
         return convertView;
     }
