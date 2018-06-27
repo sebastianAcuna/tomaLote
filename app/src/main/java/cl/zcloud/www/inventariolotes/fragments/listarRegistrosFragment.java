@@ -58,7 +58,7 @@ public class listarRegistrosFragment extends Fragment {
         // parent adapter
 //        ThreeLevelListAdapter threeLevelListAdapterAdapter = new ThreeLevelListAdapter(getActivity(), parent, secondLevel, data);
 
-        listAdapter = new AdaptadorListaPrimerNivel(getActivity(), listDataHeader, listDataUbicacion, listDataCalles, listDataChild);
+        listAdapter = new AdaptadorListaPrimerNivel(getActivity(), listDataHeader, /*listDataUbicacion,*/ listDataCalles, listDataChild);
 
         // set adapter
         expandableListView.setAdapter( listAdapter );
@@ -72,7 +72,7 @@ public class listarRegistrosFragment extends Fragment {
             @Override
             public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
                 Toast.makeText(getActivity(), "click en child", Toast.LENGTH_SHORT).show();
-                return false;
+                return true;
             }
 
         });
@@ -88,7 +88,7 @@ public class listarRegistrosFragment extends Fragment {
 
                     return true;
                 }
-                return false;
+                return true;
             }
         });
 
@@ -100,54 +100,55 @@ public class listarRegistrosFragment extends Fragment {
     private void prepareListData() {
 
 
-        List<String> listaFechas = MainActivity.myAppDB.myDao().getFechasLotes();
+        List<Lotes> listaFechas = MainActivity.myAppDB.myDao().getFechasLotes();
         List<String> listaLotes;
         List<String> listaUbicaciones;
-        List<Integer> listaCalles = null;
+        List<Lotes> listaCalles = null;
 
 
-        listDataHeader = new ArrayList<>();
+        listDataHeader = new ArrayList<>();  //fechas_ubicacion
+        listDataCalles = new HashMap<>();//ubicacion_calle
+        listDataChild = new HashMap<>(); //calle_lote
         listDataUbicacion = new HashMap<>();
-        listDataChild = new HashMap<>();
-        listDataCalles = new HashMap<>();
 
         if (listaFechas.size() > 0){
 
-            for (String fechas : listaFechas){
-                listDataHeader.add(fechas);
-                System.out.println("SE INSERTAN FECHAS " + fechas);
+            for (Lotes fecha_ubicacion : listaFechas){
 
-                listaUbicaciones = MainActivity.myAppDB.myDao().getUbicacionesLotesByFecha(fechas);
-                if (listaUbicaciones.size() > 0){
+                listDataHeader.add(fecha_ubicacion.getFechaInventario() + "_" + fecha_ubicacion.getDescUbicacionLote()); //2018-06-27_ubicacion1
+//                System.out.println("SE INSERTAN FECHAS " + fecha_ubicacion);
 
-                    ArrayList<String> fechaUbi = new ArrayList<>();
+//                listaUbicaciones = MainActivity.myAppDB.myDao().getUbicacionesLotesByFecha(fecha_ubicacion.getFechaInventario());
+//                if (listaUbicaciones.size() > 0){
+
+                    /*ArrayList<String> fechaUbi = new ArrayList<>();
                     for (String ubicaciones : listaUbicaciones) {
-                        fechaUbi.add(fechas + "_" + ubicaciones);
-                    }
+                        fechaUbi.add(fecha_ubicacion + "_" + ubicaciones);
+                    }*/
 
 
-                    listDataUbicacion.put(fechas, fechaUbi);
-                    System.out.println("lista ubicaciones " + listDataUbicacion.values().toString());
+//                    listDataUbicacion.put(fecha_ubicacion, fechaUbi);
+//                    System.out.println("lista ubicaciones " + listDataUbicacion.values().toString());
 
-                    for (String ubicaciones : listaUbicaciones){
+//                    for (String ubicaciones : listaUbicaciones){
 
-                        listaCalles = MainActivity.myAppDB.myDao().getLotesByFechaAndUbicacion(fechas,ubicaciones);
+                        listaCalles = MainActivity.myAppDB.myDao().getLotesByFechaAndUbicacion(fecha_ubicacion.getFechaInventario(),fecha_ubicacion.getDescUbicacionLote());
 
                         if (listaCalles.size() > 0){
                             ArrayList<String> ubiCalle = new ArrayList<>();
-                            for (Integer calles : listaCalles){
-                                ubiCalle.add(ubicaciones+"_"+calles);
+                            for (Lotes calles : listaCalles){
+                                ubiCalle.add(fecha_ubicacion.getFechaInventario()+ "_" +calles.getDescUbicacionLote()+"_"+calles.getCalle());
                             }
 
 
-                            listDataCalles.put(fechas + "_" + ubicaciones, ubiCalle);
-                            for (Integer calles : listaCalles){
-                                System.out.println("SE INSERTAN CALLES " + calles);
+                            listDataCalles.put(fecha_ubicacion.getFechaInventario() + "_" + fecha_ubicacion.getDescUbicacionLote(), ubiCalle);
+                            for (Lotes calles : listaCalles){
+//                                System.out.println("SE INSERTAN CALLES " + calles);
 
-                                listaLotes = MainActivity.myAppDB.myDao().getLotesByFechaUbicacionAndCalle(fechas, ubicaciones,calles);
+                                listaLotes = MainActivity.myAppDB.myDao().getLotesByFechaUbicacionAndCalle(fecha_ubicacion.getFechaInventario(), calles.getDescUbicacionLote(),calles.getCalle());
                                 for (int  e = 0 ; e < listaLotes.size(); e++){
-                                    listDataChild.put(ubicaciones + "_" + calles, listaLotes);
-                                    System.out.println("SE INSERTAN lotes " + listaLotes.get(e));
+                                    listDataChild.put(fecha_ubicacion.getFechaInventario() + "_" + calles.getDescUbicacionLote() + "_" + calles.getCalle(), listaLotes);
+//                                    System.out.println("SE INSERTAN lotes " + listaLotes.get(e));
                                 }
 
                             }
@@ -155,14 +156,14 @@ public class listarRegistrosFragment extends Fragment {
                         }
 //                    for (int i = 0; i < listaUbicaciones.size();i++){
 
-                    }
+//                    }
 
                    /* for (String ubicacion : listaUbicaciones){
 
 
 
                     }*/
-                }
+//                }
 
             }
         }

@@ -6,26 +6,30 @@ import android.app.DatePickerDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.media.AudioManager;
+import android.media.MediaPlayer;
+import android.media.SoundPool;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Vibrator;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 
 import android.support.v7.app.AlertDialog;
-import android.text.InputType;
 import android.text.TextUtils;
+import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -39,7 +43,6 @@ import android.widget.Toast;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -51,11 +54,13 @@ import java.util.UUID;
 import java.util.regex.Pattern;
 
 import cl.zcloud.www.inventariolotes.MainActivity;
+
 import cl.zcloud.www.inventariolotes.R;
 import cl.zcloud.www.inventariolotes.clases.Lotes;
 import cl.zcloud.www.inventariolotes.clases.Ubicacion;
 import es.dmoral.toasty.Toasty;
 
+import static android.content.Context.AUDIO_SERVICE;
 import static android.content.Context.MODE_PRIVATE;
 
 public class tomaExistenciaFragment extends Fragment {
@@ -73,7 +78,7 @@ public class tomaExistenciaFragment extends Fragment {
 
 
 //    bluethooth
-    Handler bluetoothIn;
+    static Handler bluetoothIn;
     final int handlerState = 0;//used to identify handler message
     private BluetoothAdapter btAdapter = null;
     private BluetoothSocket btSocket = null;
@@ -88,6 +93,18 @@ public class tomaExistenciaFragment extends Fragment {
     private static String address = null;
 
 
+    Vibrator v;
+/*    public MediaPlayer correct;
+    public MediaPlayer alert;
+    public MediaPlayer incorrect;*/
+    private SoundPool soundPool;
+    private int correct=0, alert = 0, incorrect = 0;
+    private boolean loaded = false;
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+    }
 
     @SuppressLint("HandlerLeak")
     @Nullable
@@ -99,9 +116,31 @@ public class tomaExistenciaFragment extends Fragment {
         ubicacion = (Spinner) view.findViewById(R.id.spinner_hubicacion);
         calle = (EditText) view.findViewById(R.id.lbl_calle);
         lote = (EditText) view.findViewById(R.id.lbl_lote);
-        Button button = (Button) view.findViewById(R.id.comprobar_btn);
         lbl_mensaje = (TextView) view.findViewById(R.id.lbl_mensaje);
         usuario = (EditText) view.findViewById(R.id.et_usuario);
+
+/*        correct = new SoundPool(8, AudioManager.STREAM_MUSIC, 0);
+        alert = new SoundPool(8, AudioManager.STREAM_MUSIC, 0);
+        incorrect = new SoundPool(8, AudioManager.STREAM_MUSIC, 0);*/
+
+// Set the hardware buttons to control the music
+        Objects.requireNonNull(getActivity()).setVolumeControlStream(AudioManager.STREAM_MUSIC);
+// Load the sound
+        soundPool = new SoundPool(10, AudioManager.STREAM_MUSIC, 0);
+        soundPool.setOnLoadCompleteListener(new SoundPool.OnLoadCompleteListener() {
+            @Override
+            public void onLoadComplete(SoundPool soundPool, int sampleId, int status) {
+
+                loaded = true;
+            }
+        });
+        correct = soundPool.load(Objects.requireNonNull(getActivity()), R.raw.correct, 1);
+        alert = soundPool.load(Objects.requireNonNull(getActivity()), R.raw.alert, 1);
+        incorrect = soundPool.load(Objects.requireNonNull(getActivity()), R.raw.incorrect, 1);
+
+
+
+
 
         llenarSpinner();
 
@@ -109,11 +148,16 @@ public class tomaExistenciaFragment extends Fragment {
         String fecha_remember = sharedPref.getString("remember_fecha","");
         String usuario_remember = sharedPref.getString("remember_usuario","");
         estadoPantalla = sharedPref.getInt("remember_estado",0);
+        String lote_remember = sharedPref.getString("remember_lote","");
+        int calle_remember = sharedPref.getInt("remember_calle",0);
 
 
         if (estadoPantalla > 0){
             showAlertForBloqueo();
+            calle.setText(calle_remember + "");
+            lote.setText(lote_remember);
         }
+
 
 
         etPlannedDate.setText(fecha_remember);
@@ -129,50 +173,60 @@ public class tomaExistenciaFragment extends Fragment {
         });
 
 
-        button.setOnClickListener(new View.OnClickListener() {
+        lote.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
-            public void onClick(View v) {
-                validarCampos();
+            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                boolean handled = false;
+                if (actionId == EditorInfo.IME_ACTION_DONE) {
+                    validarCampos();
+                    InputMethodManager imm = (InputMethodManager) Objects.requireNonNull(getActivity()).getSystemService(
+                            Context.INPUT_METHOD_SERVICE);
+                    imm.hideSoftInputFromWindow(lote.getApplicationWindowToken(), 0);
+                    /* Write your logic here that will be executed when user taps next button */
+                    handled = true;
+                }
+                return handled;
             }
         });
 
+                bluetoothIn = new Handler() {
+                    public void handleMessage(android.os.Message msg) {
+                        if (msg.what == handlerState) {	//if message is what we want
+                            String readMessage = (String) msg.obj; // msg.arg1 = bytes from connect thread
 
-        bluetoothIn = new Handler() {
-            public void handleMessage(android.os.Message msg) {
-                if (msg.what == handlerState) {	//if message is what we want
-                    String readMessage = (String) msg.obj; // msg.arg1 = bytes from connect thread
-                    recDataString.append(readMessage); //keep appending to string until ~
-                    int endOfLineIndex = recDataString.indexOf("~"); // determine the end-of-line
-                    if (endOfLineIndex > 0) { // make sure there data before ~
+                            lote.setText(readMessage);
+
+                            if (!TextUtils.isEmpty(lote.getText())){
+                                validarCampos();
+                            }
+//                    recDataString.append(readMessage); //keep appending to string until ~
+//                    int endOfLineIndex = recDataString.indexOf("~"); // determine the end-of-line
+/*                    if (endOfLineIndex > 0) { // make sure there data before ~
                         String dataInPrint = recDataString.substring(0, endOfLineIndex);  // extract string
                         lote.setText("Datos recibidos = " + dataInPrint);
                         int dataLength = dataInPrint.length();	//get length of data received
                         usuario.setText("Tamaño del String = " + String.valueOf(dataLength));
 
-                        if (recDataString.charAt(0) == '#')	//if it starts with # we know it is what we are looking for
+                        *//*if (recDataString.charAt(0) == '#')	//if it starts with # we know it is what we are looking for
                         {
                             String sensor0 = recDataString.substring(1, 5);             //get sensor value from string between indices 1-5
                             String sensor1 = recDataString.substring(6, 10);            //same again...
                             String sensor2 = recDataString.substring(11, 15);
                             String sensor3 = recDataString.substring(16, 20);
                             //sensorView3.setText(" Sensor 3 Voltage = " + sensor3 + "V");
-                        }
+                        }*//*
                         recDataString.delete(0, recDataString.length()); 					//clear all string data
                         // strIncom =" ";
                         dataInPrint = " ";
+                    }*/
+                        }
                     }
+                };
+
+                btAdapter = BluetoothAdapter.getDefaultAdapter();       // get Bluetooth adapter
+                if (checkBTState()){
+                    comprobarPareja();
                 }
-            }
-        };
-
-        btAdapter = BluetoothAdapter.getDefaultAdapter();       // get Bluetooth adapter
-
-
-
-        if (checkBTState()){
-            comprobarPareja();
-        }
-
 
 
         return view;
@@ -184,6 +238,7 @@ public class tomaExistenciaFragment extends Fragment {
         //creates secure outgoing connecetion with BT device using UUID
     }
 
+    @SuppressLint("HandlerLeak")
     @Override
     public void onResume() {
         super.onResume();
@@ -191,6 +246,41 @@ public class tomaExistenciaFragment extends Fragment {
         if (checkBTState()){
             comprobarPareja();
         }
+
+
+        bluetoothIn = new Handler() {
+            public void handleMessage(android.os.Message msg) {
+                if (msg.what == handlerState) {	//if message is what we want
+                    String readMessage = (String) msg.obj; // msg.arg1 = bytes from connect thread
+
+                    lote.setText(readMessage);
+
+                    if (!TextUtils.isEmpty(lote.getText())){
+                        validarCampos();
+                    }
+//                    recDataString.append(readMessage); //keep appending to string until ~
+//                    int endOfLineIndex = recDataString.indexOf("~"); // determine the end-of-line
+/*                    if (endOfLineIndex > 0) { // make sure there data before ~
+                        String dataInPrint = recDataString.substring(0, endOfLineIndex);  // extract string
+                        lote.setText("Datos recibidos = " + dataInPrint);
+                        int dataLength = dataInPrint.length();	//get length of data received
+                        usuario.setText("Tamaño del String = " + String.valueOf(dataLength));
+
+                        *//*if (recDataString.charAt(0) == '#')	//if it starts with # we know it is what we are looking for
+                        {
+                            String sensor0 = recDataString.substring(1, 5);             //get sensor value from string between indices 1-5
+                            String sensor1 = recDataString.substring(6, 10);            //same again...
+                            String sensor2 = recDataString.substring(11, 15);
+                            String sensor3 = recDataString.substring(16, 20);
+                            //sensorView3.setText(" Sensor 3 Voltage = " + sensor3 + "V");
+                        }*//*
+                        recDataString.delete(0, recDataString.length()); 					//clear all string data
+                        // strIncom =" ";
+                        dataInPrint = " ";
+                    }*/
+                }
+            }
+        };
         //Get MAC address from DeviceListActivity via intent
 //        Intent intent = Objects.requireNonNull(getActivity()).getIntent();
 
@@ -217,9 +307,9 @@ public class tomaExistenciaFragment extends Fragment {
                 address = btd.getAddress();
             }
             echarAndarBT();
-            Toasty.success(Objects.requireNonNull(getActivity()),"Emparejado <3", Toast.LENGTH_SHORT,true).show();
+            Toasty.success(Objects.requireNonNull(getActivity()),"Emparejado ", Toast.LENGTH_SHORT,true).show();
         } else {
-            Toasty.error(Objects.requireNonNull(getActivity()),"Sin pareja </3", Toast.LENGTH_SHORT,true).show();
+            Toasty.error(Objects.requireNonNull(getActivity()),"Sin pareja ", Toast.LENGTH_SHORT,true).show();
         }
     }
 
@@ -231,7 +321,7 @@ public class tomaExistenciaFragment extends Fragment {
         try {
             btSocket = createBluetoothSocket(device);
         } catch (IOException e) {
-            Toast.makeText(Objects.requireNonNull(getActivity()).getBaseContext(), "La creacción del Socket fallo", Toast.LENGTH_LONG).show();
+            Toasty.error(Objects.requireNonNull(getActivity()).getBaseContext(), "La creacción del Socket fallo", Toast.LENGTH_LONG,true).show();
         }
         // Establish the Bluetooth socket connection.
         try
@@ -243,6 +333,7 @@ public class tomaExistenciaFragment extends Fragment {
                 btSocket.close();
             } catch (IOException e2)
             {
+                Toasty.error(Objects.requireNonNull(getActivity()).getBaseContext(), "La creacción del Socket fallo intento n°2", Toast.LENGTH_LONG,true).show();
                 //insert code to deal with this
             }
         }
@@ -255,6 +346,8 @@ public class tomaExistenciaFragment extends Fragment {
     public void onPause()
     {
         super.onPause();
+
+        v = null;
         if (checkBTState()){
             try
             {
@@ -269,9 +362,8 @@ public class tomaExistenciaFragment extends Fragment {
 
     //Checks that the Android device Bluetooth is available and prompts to be turned on if off
     private boolean checkBTState() {
-
         if(btAdapter==null) {
-            Toast.makeText(Objects.requireNonNull(getActivity()).getBaseContext(), "El dispositivo no soporta bluetooth", Toast.LENGTH_LONG).show();
+            Toasty.info(Objects.requireNonNull(getActivity()).getBaseContext(), "El dispositivo no soporta bluetooth", Toast.LENGTH_LONG,true).show();
             return false;
         } else {
             if (btAdapter.isEnabled()) {
@@ -291,25 +383,22 @@ public class tomaExistenciaFragment extends Fragment {
         private final OutputStream mmOutStream;
 
         //creation of the connect thread
-        public ConnectedThread(BluetoothSocket socket) {
+        ConnectedThread(BluetoothSocket socket) {
             InputStream tmpIn = null;
             OutputStream tmpOut = null;
-
             try {
                 //Create I/O streams for connection
                 tmpIn = socket.getInputStream();
                 tmpOut = socket.getOutputStream();
-            } catch (IOException e) { }
+            } catch (IOException ignored) { Toasty.info(Objects.requireNonNull(getActivity()),"Se perdio la conexión con el dispositivo", Toast.LENGTH_SHORT,false).show();  }
 
             mmInStream = tmpIn;
             mmOutStream = tmpOut;
         }
 
-
         public void run() {
             byte[] buffer = new byte[256];
             int bytes;
-
             // Keep looping to listen for received messages
             while (true) {
                 try {
@@ -335,10 +424,6 @@ public class tomaExistenciaFragment extends Fragment {
             }
         }
     }
-
-
-
-
 
 
     public void llenarSpinner(){
@@ -406,8 +491,6 @@ public class tomaExistenciaFragment extends Fragment {
         return (n<=9) ? ("0"+n) : String.valueOf(n);
     }
 
-
-
     private void validarCampos(){
 
         SharedPreferences sharedPref = Objects.requireNonNull(getActivity()).getSharedPreferences("remember_me",MODE_PRIVATE);
@@ -416,9 +499,8 @@ public class tomaExistenciaFragment extends Fragment {
         if (estadoPantalla > 0 ){
             showAlertForBloqueo();
         }else {
-
             if (TextUtils.isEmpty(etPlannedDate.getText()) || TextUtils.isEmpty(usuario.getText()) || TextUtils.isEmpty(calle.getText()) || TextUtils.isEmpty(lote.getText())) {
-                Toasty.info(Objects.requireNonNull(getActivity()), "Debe completar todos los campos", Toast.LENGTH_SHORT, true).show();
+                Toasty.info(Objects.requireNonNull(getActivity()), "Debe completar todos los campos", Toast.LENGTH_LONG, true).show();
             } else {
                 lbl_mensaje.setText("");
                 lbl_mensaje.setBackgroundColor(getResources().getColor(R.color.whiteText));
@@ -446,12 +528,26 @@ public class tomaExistenciaFragment extends Fragment {
                                 @Override
                                 public void run() {
                                     if (loteList.size() > 0) {
+                                        v = (Vibrator) Objects.requireNonNull(getActivity()).getSystemService(Context.VIBRATOR_SERVICE);
+                                        if (v != null) {
+                                            v.vibrate(400);
+                                        }
+                                        reproducirSound(alert);
+
                                         lbl_mensaje.setBackgroundColor(getResources().getColor(R.color.warning));
                                         lbl_mensaje.setTextColor(getResources().getColor(R.color.black));
                                         lbl_mensaje.setText(R.string.mnsj_lbl_warning);
-                                        Toasty.warning(Objects.requireNonNull(getActivity()), "Lote ya ingresado para este inventario", Toast.LENGTH_SHORT, true).show();
+//                                        Toasty.warning(Objects.requireNonNull(getActivity()), "Lote ya ingresado para este inventario", Toast.LENGTH_SHORT, true).show();
+
+                                        v = null;
                                     } else {
+                                        SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss", Locale.getDefault());
+                                        Date da = new Date();
+                                        final String fechaFinal = df.format(da);
+
+
                                         Lotes lotes = new Lotes();
+                                        lotes.setFechaDispo(fechaFinal);
                                         lotes.setCalle(Integer.parseInt(calle.getText().toString()));
                                         lotes.setDescUbicacionLote(nombreUbicacion);
                                         lotes.setFechaInventario(fechaFinal);
@@ -461,6 +557,12 @@ public class tomaExistenciaFragment extends Fragment {
                                         try {
                                             long idLote = MainActivity.myAppDB.myDao().insertarLote(lotes);
                                             if (idLote > 0) {
+                                                v = (Vibrator) Objects.requireNonNull(getActivity()).getSystemService(Context.VIBRATOR_SERVICE);
+                                                if (v != null) {
+                                                    v.vibrate(400);
+                                                }
+                                                reproducirSound(correct);
+
                                                 lbl_mensaje.setBackgroundColor(getResources().getColor(R.color.success));
                                                 lbl_mensaje.setTextColor(getResources().getColor(R.color.whiteText));
                                                 lbl_mensaje.setText(R.string.mnsj_lbl_success);
@@ -469,7 +571,10 @@ public class tomaExistenciaFragment extends Fragment {
                                                 SharedPreferences.Editor editor = sharedPref.edit();
                                                 editor.putInt("remember_calle", Integer.parseInt(calle.getText().toString()));
                                                 editor.apply();
-                                                Toasty.success(Objects.requireNonNull(getActivity()), "OK!", Toast.LENGTH_SHORT, true).show();
+//                                                Toasty.success(Objects.requireNonNull(getActivity()), "OK!", Toast.LENGTH_SHORT, true).show();
+//                                                v.cancel();
+//                                                stop_mp();
+                                                v = null;
                                             }
                                         } catch (Exception e) {
                                             e.printStackTrace();
@@ -480,23 +585,49 @@ public class tomaExistenciaFragment extends Fragment {
                         }
                     });
                 } else {
+                    v = (Vibrator) Objects.requireNonNull(getActivity()).getSystemService(Context.VIBRATOR_SERVICE);
+                    if (v != null) {
+                        v.vibrate(400);
+                    }
+                    reproducirSound(incorrect);
+//                    play_sp(2);
                     SharedPreferences.Editor editor = sharedPref.edit();
                     editor.putString("remember_fecha", etPlannedDate.getText().toString());
                     editor.putString("remember_usuario", usuario.getText().toString());
                     editor.putInt("remember_lugar", ubicacion.getSelectedItemPosition());
                     editor.putInt("remember_calle", Integer.parseInt(calle.getText().toString()));
                     editor.putInt("remember_estado", 1);
+                    editor.putString("remember_lote", lote.getText().toString());
                     editor.apply();
                     lbl_mensaje.setBackgroundColor(getResources().getColor(R.color.danger));
                     lbl_mensaje.setTextColor(getResources().getColor(R.color.whiteText));
-                    lbl_mensaje.setText(R.string.mnsj_lbl_danger);
-                    Toasty.error(Objects.requireNonNull(getActivity()), "ERROR DE FORMATO EN ETIQUETA", Toast.LENGTH_SHORT, true).show();
+                    String texto = " ERROR! \nERROR DE FORMATO EN ETIQUETA\n"+ lote.getText();
+                    lbl_mensaje.setText(texto);
+//                    Toasty.error(Objects.requireNonNull(getActivity()), "ERROR DE FORMATO EN ETIQUETA", Toast.LENGTH_SHORT, true).show();
                     showAlertForBloqueo();
+//                    v.cancel();
+//                    stop_mp();
+                    v = null;
                 }
             }
         }
     }
 
+
+    private void reproducirSound(int action){
+
+        AudioManager audioManager = (AudioManager) Objects.requireNonNull(getActivity()).getSystemService(AUDIO_SERVICE);
+        if (audioManager != null){
+            float actualVolume = (float) audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
+            float maxVolume = (float) audioManager
+                    .getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+            float volume = actualVolume / maxVolume;
+
+            if (loaded) {
+                soundPool.play(action, volume, volume, 1, 0, 1f);
+            }
+        }
+    }
 
     private void showDatePickerDialog() {
         DatePickerFragment newFragment = DatePickerFragment.newInstance(new DatePickerDialog.OnDateSetListener() {

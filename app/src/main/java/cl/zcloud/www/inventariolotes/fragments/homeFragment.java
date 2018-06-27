@@ -48,13 +48,6 @@ public class homeFragment extends Fragment {
 
         lbl_total_registros = view.findViewById(R.id.lbl_total_registro);
 
-       /* Toasty.error(Objects.requireNonNull(getActivity()), "This is an error toast.", Toast.LENGTH_SHORT, true).show();
-        Toasty.success(Objects.requireNonNull(getActivity()), "Success!", Toast.LENGTH_SHORT, true).show();
-        Toasty.warning(Objects.requireNonNull(getActivity()), "Beware of the dog.", Toast.LENGTH_SHORT, true).show();
-        Toast.makeText(getActivity(), "toast normal", Toast.LENGTH_SHORT).show();*/
-
-
-
        mostrarCountRegistros();
 
 
@@ -179,6 +172,7 @@ public class homeFragment extends Fragment {
                 .setPositiveButton("Aceptar", new DialogInterface.OnClickListener(){
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
+
                     }
                 }).create();
 

@@ -22,5 +22,11 @@
             android:icon="@drawable/left_menu_mantenedor"
             android:title="@string/left_menu_mant" />
 
+        <item
+            android:id="@+id/l_menu_herr_admin"
+            android:icon="@drawable/left_menu_herr_admin"
+            android:title="@string/left_menu_herr_admin"
+            />
     </group>
+
 </menu>

@@ -19,13 +19,13 @@ public class AdaptadorListaSegundoNivel extends BaseExpandableListAdapter {
 
     private Context _context;
     private List<String> _headers; //ubicaciones
-    private HashMap<String, List<String>> _parent; //calles
+//    private HashMap<String, List<String>> _parent; //calles
     private HashMap<String, List<String>> _child; //lotes
 
-    public AdaptadorListaSegundoNivel(Context context, List<String> headers,HashMap<String, List<String>> parent, HashMap<String, List<String>> child){
+    public AdaptadorListaSegundoNivel(Context context, List<String> headers,/*HashMap<String, List<String>> parent,*/ HashMap<String, List<String>> child){
         this._context = context;
         this._headers = headers;
-        this._parent = parent;
+//        this._parent = parent;
         this._child = child;
 
     }
@@ -47,20 +47,20 @@ public class AdaptadorListaSegundoNivel extends BaseExpandableListAdapter {
 
     @Override
     public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
-        LayoutInflater inflater = (LayoutInflater) _context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        if (inflater != null) {
-            convertView = inflater.inflate(R.layout.list_second_level, null);
-        }
-        TextView text = convertView.findViewById(R.id.lblListFecha);
         String[] groupText = TextUtils.split((String) getGroup(groupPosition), "_");
-        text.setText(groupText[1]);
-
+        if (convertView == null) {
+            LayoutInflater inflater = (LayoutInflater) _context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            convertView = inflater.inflate(R.layout.list_second_level, null);
+            TextView text = convertView.findViewById(R.id.lblListFecha);
+            text.setText(groupText[0] + " " + groupText[1] + " " + groupText[2]);
+            System.out.println(groupText[0] + " " + groupText[1] + " " + groupText[2]);
+        }
         return convertView;
     }
 
     @Override
     public Object getChild(int groupPosition, int childPosition) {
-        return _parent.get(_headers.get(groupPosition)).get(childPosition);
+        return _child.get(_headers.get(groupPosition)).get(childPosition);
     }
 
     @Override
@@ -71,18 +71,28 @@ public class AdaptadorListaSegundoNivel extends BaseExpandableListAdapter {
     @Override
     public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
 
-    final ThirdLevelExpandableListView adapterLevel3 = new ThirdLevelExpandableListView(_context);
+        String childArray = (String) getChild(groupPosition,childPosition);
+        if (convertView == null){
+            LayoutInflater inflater = (LayoutInflater) this._context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            convertView = inflater.inflate(R.layout.list_fourth_level, null);
+            TextView textView =  convertView.findViewById(R.id.lblListUbicacion);
+            textView.setText(childArray);
+        }
 
-        ArrayList<String> chilldd = new ArrayList<>();
+        return convertView;
+
+//    final ThirdLevelExpandableListView adapterLevel3 = new ThirdLevelExpandableListView(_context);
+
+        /*ArrayList<String> chilldd = new ArrayList<>();
         chilldd.add(getChild(groupPosition,childPosition).toString());
 //        adapterLevel3.measure(parent.getWidth(),parent.getHeight());
         adapterLevel3.setAdapter(new AdaptadorListaTercerNivel(_context, chilldd , _child));
-        adapterLevel3.setGroupIndicator(null);
+        adapterLevel3.setGroupIndicator(null);*/
 
 
 
 
-        adapterLevel3.setOnGroupExpandListener(new ExpandableListView.OnGroupExpandListener() {
+       /* adapterLevel3.setOnGroupExpandListener(new ExpandableListView.OnGroupExpandListener() {
             int previousGroup = -1;
 
             @Override
@@ -91,19 +101,19 @@ public class AdaptadorListaSegundoNivel extends BaseExpandableListAdapter {
                     adapterLevel3.collapseGroup(previousGroup);
                 previousGroup = groupPosition;
             }
-        });
+        });*/
 
-        return adapterLevel3;
+//        return adapterLevel3;
     }
 
     @Override
     public int getChildrenCount(int groupPosition) {
-        return this._parent.get(_headers.get(groupPosition)).size();
+        return this._child.get(_headers.get(groupPosition)).size();
     }
 
     @Override
     public boolean hasStableIds() {
-        return false;
+        return true;
     }
 
     @Override

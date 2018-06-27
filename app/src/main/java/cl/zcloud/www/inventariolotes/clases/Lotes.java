@@ -24,6 +24,8 @@ public class Lotes {
     private String lote;
     @ColumnInfo(name = "estado")
     private int estado;
+    @ColumnInfo(name = "fecha_telefono")
+    private  String fechaDispo;
 
     public Lotes() {
     }
@@ -82,5 +84,12 @@ public class Lotes {
     }
     public void setEstado(int estado) {
         this.estado = estado;
+    }
+
+    public String getFechaDispo() {
+        return fechaDispo;
+    }
+    public void setFechaDispo(String fechaDispo) {
+        this.fechaDispo = fechaDispo;
     }
 }

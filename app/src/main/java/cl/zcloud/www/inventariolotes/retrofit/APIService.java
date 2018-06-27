@@ -10,7 +10,7 @@ import retrofit2.http.POST;
 
 public interface APIService {
 
-    @POST("insertar_lotes.php")
+    @POST("entregar_2.php")
     Call<RespuestaPost> setLotes(@Body ArrayList<Lotes> lotes);
 
 }

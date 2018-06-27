@@ -15,5 +15,10 @@
     <color name="warning">#ECA000</color>
 
 
+    <color name="materialDarkBlue">#193E4D</color>
+    <color name="materialSemiBlue">#255A6F</color>
+    <color name="materialLightBlue">#3D8DB8</color>
+
+
 
 </resources>

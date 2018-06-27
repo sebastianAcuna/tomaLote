@@ -10,6 +10,7 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.text.TextUtils;
 import android.view.MenuItem;
 import android.widget.TextView;
 
@@ -21,6 +22,7 @@ import java.util.Locale;
 import java.util.Objects;
 
 import cl.zcloud.www.inventariolotes.bd.MyAppDB;
+import cl.zcloud.www.inventariolotes.fragments.adminFragment;
 import cl.zcloud.www.inventariolotes.fragments.homeFragment;
 import cl.zcloud.www.inventariolotes.fragments.listarRegistrosFragment;
 import cl.zcloud.www.inventariolotes.fragments.mantenedorFragment;
@@ -55,9 +57,11 @@ public class MainActivity extends AppCompatActivity {
 
         SimpleDateFormat dt = new SimpleDateFormat("dd-MM-yyyy", Locale.getDefault());
         Date dts = new Date();
-        String fechTotal = dt.format(dts);
+        String[] fechTotal = TextUtils.split(dt.format(dts), "-");
 
-        lblHeader.setText(fechTotal);
+        String fechaFinal = fechTotal[0] + "-" + fechTotal[1] + "-" +fechTotal[2];
+
+        lblHeader.setText(fechaFinal);
 
 
         navigationView.setCheckedItem(R.id.l_menu_inicio);
@@ -98,9 +102,15 @@ public class MainActivity extends AppCompatActivity {
             case R.id.l_menu_mant_ubic:
                 fragmentClass = mantenedorFragment.class;
                 break;
+
+            case R.id.l_menu_herr_admin:
+                fragmentClass = adminFragment.class;
+                break;
+
             default:
                 fragmentClass = homeFragment.class;
                 break;
+
         }
 
         cambiarFragment(fragmentClass);
