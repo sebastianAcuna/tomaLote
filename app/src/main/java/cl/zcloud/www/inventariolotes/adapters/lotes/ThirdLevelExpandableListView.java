@@ -12,11 +12,18 @@ public class ThirdLevelExpandableListView extends ExpandableListView {
     }
 
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        /*
-         * Adjust height
-         */
-        heightMeasureSpec = MeasureSpec.makeMeasureSpec(1500, MeasureSpec.EXACTLY);
+        heightMeasureSpec = MeasureSpec.makeMeasureSpec(600, MeasureSpec.AT_MOST);
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        try {
+            super.onDetachedFromWindow();
+        } catch (IllegalArgumentException e) {
+            // TODO: Workaround for
+            // http://code.google.com/p/android/issues/detail?id=22751
+        }
     }
 
 }

@@ -71,28 +71,29 @@ public class AdaptadorListaSegundoNivel extends BaseExpandableListAdapter {
     @Override
     public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
 
-    final SecondLevelExpandableListView adapterLevel2 = new SecondLevelExpandableListView(_context);
+    final ThirdLevelExpandableListView adapterLevel3 = new ThirdLevelExpandableListView(_context);
 
         ArrayList<String> chilldd = new ArrayList<>();
         chilldd.add(getChild(groupPosition,childPosition).toString());
+//        adapterLevel3.measure(parent.getWidth(),parent.getHeight());
+        adapterLevel3.setAdapter(new AdaptadorListaTercerNivel(_context, chilldd , _child));
+        adapterLevel3.setGroupIndicator(null);
 
-        adapterLevel2.setAdapter(new AdaptadorListaTercerNivel(_context, chilldd , _child));
-        adapterLevel2.setGroupIndicator(null);
 
 
 
-        adapterLevel2.setOnGroupExpandListener(new ExpandableListView.OnGroupExpandListener() {
+        adapterLevel3.setOnGroupExpandListener(new ExpandableListView.OnGroupExpandListener() {
             int previousGroup = -1;
 
             @Override
             public void onGroupExpand(int groupPosition) {
                 if(groupPosition != previousGroup)
-                    adapterLevel2.collapseGroup(previousGroup);
+                    adapterLevel3.collapseGroup(previousGroup);
                 previousGroup = groupPosition;
             }
         });
 
-        return adapterLevel2;
+        return adapterLevel3;
     }
 
     @Override

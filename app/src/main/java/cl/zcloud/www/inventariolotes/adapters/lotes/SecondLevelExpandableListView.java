@@ -11,10 +11,19 @@ public class SecondLevelExpandableListView extends ExpandableListView {
     }
 
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        /*
-         * Adjust height
-         */
-        heightMeasureSpec = MeasureSpec.makeMeasureSpec(500, MeasureSpec.EXACTLY);
+//        widthMeasureSpec = MeasureSpec.makeMeasureSpec(99999999, MeasureSpec.AT_MOST);
+        heightMeasureSpec = MeasureSpec.makeMeasureSpec(900, MeasureSpec.AT_MOST);
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
     }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        try {
+            super.onDetachedFromWindow();
+        } catch (IllegalArgumentException e) {
+            // TODO: Workaround for
+            // http://code.google.com/p/android/issues/detail?id=22751
+        }
+    }
 }
+

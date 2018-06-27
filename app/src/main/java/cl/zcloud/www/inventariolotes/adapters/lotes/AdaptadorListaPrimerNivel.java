@@ -69,20 +69,6 @@ public class AdaptadorListaPrimerNivel extends BaseExpandableListAdapter {
             }
         });
 
-
-
-        /*final String childText = (String) getChild(groupPosition, childPosition);
-
-        if (convertView == null) {
-            LayoutInflater infalInflater = (LayoutInflater) this._context
-                    .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            convertView = infalInflater.inflate(R.layout.list_second_level, null);
-        }
-
-        TextView txtListChild = (TextView) convertView
-                .findViewById(R.id.lblListFecha);
-
-        txtListChild.setText(childText);*/
         return  adapterLevel2;
     }
 
