@@ -173,7 +173,7 @@ public class adminFragment extends Fragment {
     }
 
 
-    private void showAlertForBloqueo(){
+    private void showAlertForBloqueo(){/*
         View viewInfalted = LayoutInflater.from(Objects.requireNonNull(getActivity())).inflate(R.layout.alert_bloqueo,null);
         final EditText txt = viewInfalted.findViewById(R.id.edit_bloqueo);
 
@@ -182,8 +182,9 @@ public class adminFragment extends Fragment {
         String fActual = fcA.format(fHa);
 
         String[] fechaAGuardar = TextUtils.split(fActual, "-");
+        //String[] diaFecha = TextUtils.split(fechaAGuardar[0],"");
 
-        final int password = ((Integer.parseInt(fechaAGuardar[0]) * 4) - 3);
+        final int password = ((Integer.parseInt(fechaAGuardar) * 4) - 3);
 
         final AlertDialog builder = new AlertDialog.Builder(Objects.requireNonNull(getActivity()))
                 .setView(viewInfalted)
@@ -231,7 +232,7 @@ public class adminFragment extends Fragment {
         });
         builder.setCancelable(false);
         builder.show();
-    }
+    */}
 
 
     public void cambiarFragment( Class fragmentClass){

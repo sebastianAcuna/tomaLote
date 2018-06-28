@@ -71,8 +71,8 @@ public class AdaptadorListaSegundoNivel extends BaseExpandableListAdapter {
     @Override
     public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
 
-        String childArray = (String) getChild(groupPosition,childPosition);
         if (convertView == null){
+            String childArray = (String) getChild(groupPosition,childPosition);
             LayoutInflater inflater = (LayoutInflater) this._context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             convertView = inflater.inflate(R.layout.list_fourth_level, null);
             TextView textView =  convertView.findViewById(R.id.lblListUbicacion);
@@ -113,11 +113,11 @@ public class AdaptadorListaSegundoNivel extends BaseExpandableListAdapter {
 
     @Override
     public boolean hasStableIds() {
-        return true;
+        return false;
     }
 
     @Override
     public boolean isChildSelectable(int groupPosition, int childPosition) {
-        return true;
+        return false;
     }
 }

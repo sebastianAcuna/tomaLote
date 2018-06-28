@@ -1,15 +1,25 @@
 package cl.zcloud.www.inventariolotes.fragments;
 
 
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.ExpandableListAdapter;
 import android.widget.ExpandableListView;
+import android.widget.LinearLayout;
+import android.widget.ScrollView;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -17,27 +27,33 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Objects;
 
 import cl.zcloud.www.inventariolotes.MainActivity;
 import cl.zcloud.www.inventariolotes.R;
+import cl.zcloud.www.inventariolotes.adapters.AdaptadorListaLotes;
 import cl.zcloud.www.inventariolotes.adapters.lotes.AdaptadorListaPrimerNivel;
+import cl.zcloud.www.inventariolotes.adapters.lotes.AdaptadorListaTercerNivel;
 import cl.zcloud.www.inventariolotes.clases.Lotes;
+import cl.zcloud.www.inventariolotes.clases.Ubicacion;
+
+import static android.content.Context.MODE_PRIVATE;
 
 public class listarRegistrosFragment extends Fragment {
 
     ExpandableListView expandableListView;
-    AdaptadorListaPrimerNivel listAdapter;
-    ArrayList<String> listDataHeader;
-    HashMap<String, List<String>> listDataUbicacion;
-    HashMap<String, List<String>> listDataChild;
-    HashMap<String, List<String>> listDataCalles;
+    AdaptadorListaTercerNivel listAdapter;
+    ArrayList<Lotes> arrlistaLote;
+    ArrayList<String> descFechas,descUbicacion, descCalles;
+    LinearLayout mStitchingWorksListView;
 
+    private int mInitialHeight= 0;
 
-//    List<String[]> secondLevel = new ArrayList<>();
+    Spinner fechas,ubicaciones,calles;
+    RecyclerView RecyclerlistaLotes;
+    AdaptadorListaLotes adapterListaLotes;
 
-//    List<LinkedHashMap<String, String[]>> data = new ArrayList<>();
-
-
+    ArrayAdapter<String> spinnerAdapterFechas, spinnerAdapterUbicacion, spinnerAdapterCalles;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -50,156 +66,231 @@ public class listarRegistrosFragment extends Fragment {
         View view = inflater.inflate(R.layout.listar_registros_fragment, container, false);
 
         //lista expandible
-        expandableListView = view.findViewById(R.id.expandable_lv);
+//        expandableListView = view.findViewById(R.id.expandable_lv);
+        ubicaciones = view.findViewById(R.id.spinner_ubicacion);
+        fechas = view.findViewById(R.id.spinner_fechas);
+        calles = view.findViewById(R.id.spinner_calles);
+        RecyclerlistaLotes = view.findViewById(R.id.lista_lotes);
+
 
         //cargar arrays;
-        prepareListData();
-
-        // parent adapter
-//        ThreeLevelListAdapter threeLevelListAdapterAdapter = new ThreeLevelListAdapter(getActivity(), parent, secondLevel, data);
-
-        listAdapter = new AdaptadorListaPrimerNivel(getActivity(), listDataHeader, /*listDataUbicacion,*/ listDataCalles, listDataChild);
-
-        // set adapter
-        expandableListView.setAdapter( listAdapter );
+        prepararListaFechas();
 
 
 
-
-
-        expandableListView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
-
+        /*expandableListView.setOnGroupClickListener(new ExpandableListView.OnGroupClickListener() {
             @Override
-            public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
-                Toast.makeText(getActivity(), "click en child", Toast.LENGTH_SHORT).show();
+            public boolean onGroupClick(ExpandableListView parent, View v, int groupPosition, long id) {
+                //Other Expansion/Collapsing Logic
+                setListHeightToWrap();
                 return true;
             }
+        });*/
 
-        });
-
-        expandableListView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+       /* expandableListView.setOnGroupExpandListener(new ExpandableListView.OnGroupExpandListener() {
             @Override
-            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                if (ExpandableListView.getPackedPositionType(id) == ExpandableListView.PACKED_POSITION_TYPE_GROUP){
-                    int groupPosition = ExpandableListView.getPackedPositionGroup(id);
-//                    int childPosition = ExpandableListView.getPackedPositionChild(id);
-
-                    Toast.makeText(getActivity(), "click largo en parent", Toast.LENGTH_SHORT).show();
-
-                    return true;
+            public void onGroupExpand(int groupPosition) {
+                LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) expandableListView.getLayoutParams();
+                //The Logic here will change as per your requirements and the height of each of the children in the group
+                if (listAdapter.getChildrenCount(groupPosition) > 6) {
+                    params.height = 9 * mInitialHeight;
+                } else {
+                    params.height = 6 * mInitialHeight;
                 }
-                return true;
+                //For Last Group in the list and the number of children were less as compared to other groups
+                if (groupPosition == listAdapter.getGroupCount() - 1) {
+                    params.height = 3 * mInitialHeight;
+                }
+                expandableListView.setLayoutParams(params);
+                expandableListView.refreshDrawableState();
+                expandableListView.refreshDrawableState();
             }
-        });
+        });*/
 
 
         return view;
     }
 
 
-    private void prepareListData() {
+
+   /*public void setListHeightToWrap(){
+       LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) expandableListView.getLayoutParams();
+       params.height = ViewGroup.LayoutParams.WRAP_CONTENT;
+       expandableListView.setLayoutParams(params);
+       expandableListView.refreshDrawableState();
+       mScrollView.refreshDrawableState();
+    }*/
 
 
-        List<Lotes> listaFechas = MainActivity.myAppDB.myDao().getFechasLotes();
-        List<String> listaLotes;
-        List<String> listaUbicaciones;
-        List<Lotes> listaCalles = null;
 
+    private void prepararListaFechas(){
 
-        listDataHeader = new ArrayList<>();  //fechas_ubicacion
-        listDataCalles = new HashMap<>();//ubicacion_calle
-        listDataChild = new HashMap<>(); //calle_lote
-        listDataUbicacion = new HashMap<>();
+//        listaFechasSpinner = new ArrayList<>();
+        descFechas = new ArrayList<>();
+        AsyncTask.execute(new Runnable() {
+            @Override
+            public void run() {
+                final List<Lotes> listaFechas = MainActivity.myAppDB.myDao().getFechasLotes();
+                Objects.requireNonNull(getActivity()).runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (listaFechas.size() > 0){
 
-        if (listaFechas.size() > 0){
+//                            listaFechasSpinner.addAll(listaFechas);
 
-            for (Lotes fecha_ubicacion : listaFechas){
-
-                listDataHeader.add(fecha_ubicacion.getFechaInventario() + "_" + fecha_ubicacion.getDescUbicacionLote()); //2018-06-27_ubicacion1
-//                System.out.println("SE INSERTAN FECHAS " + fecha_ubicacion);
-
-//                listaUbicaciones = MainActivity.myAppDB.myDao().getUbicacionesLotesByFecha(fecha_ubicacion.getFechaInventario());
-//                if (listaUbicaciones.size() > 0){
-
-                    /*ArrayList<String> fechaUbi = new ArrayList<>();
-                    for (String ubicaciones : listaUbicaciones) {
-                        fechaUbi.add(fecha_ubicacion + "_" + ubicaciones);
-                    }*/
-
-
-//                    listDataUbicacion.put(fecha_ubicacion, fechaUbi);
-//                    System.out.println("lista ubicaciones " + listDataUbicacion.values().toString());
-
-//                    for (String ubicaciones : listaUbicaciones){
-
-                        listaCalles = MainActivity.myAppDB.myDao().getLotesByFechaAndUbicacion(fecha_ubicacion.getFechaInventario(),fecha_ubicacion.getDescUbicacionLote());
-
-                        if (listaCalles.size() > 0){
-                            ArrayList<String> ubiCalle = new ArrayList<>();
-                            for (Lotes calles : listaCalles){
-                                ubiCalle.add(fecha_ubicacion.getFechaInventario()+ "_" +calles.getDescUbicacionLote()+"_"+calles.getCalle());
+                            for (int i = 0; i < listaFechas.size(); i++){
+//                                idUbicacion.add(listaUbicacion.get(i).getIdUbicacion());
+                                descFechas.add(listaFechas.get(i).getFechaInventario());
                             }
 
-
-                            listDataCalles.put(fecha_ubicacion.getFechaInventario() + "_" + fecha_ubicacion.getDescUbicacionLote(), ubiCalle);
-                            for (Lotes calles : listaCalles){
-//                                System.out.println("SE INSERTAN CALLES " + calles);
-
-                                listaLotes = MainActivity.myAppDB.myDao().getLotesByFechaUbicacionAndCalle(fecha_ubicacion.getFechaInventario(), calles.getDescUbicacionLote(),calles.getCalle());
-                                for (int  e = 0 ; e < listaLotes.size(); e++){
-                                    listDataChild.put(fecha_ubicacion.getFechaInventario() + "_" + calles.getDescUbicacionLote() + "_" + calles.getCalle(), listaLotes);
-//                                    System.out.println("SE INSERTAN lotes " + listaLotes.get(e));
-                                }
-
-                            }
-
+                        }else{
+                            descFechas.add("No tiene Fechas agregadas");
                         }
-//                    for (int i = 0; i < listaUbicaciones.size();i++){
+                        spinnerAdapterFechas = new ArrayAdapter<>(Objects.requireNonNull(getActivity()),android.R.layout.simple_list_item_1,descFechas);
+                        fechas.setAdapter(spinnerAdapterFechas);
+                        fechas.setSelection(0);
 
-//                    }
+                        fechas.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                            @Override
+                            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                                System.out.println(descFechas.get(position));
+                               prepararListaUbicacion(descFechas.get(position));
+                            }
 
-                   /* for (String ubicacion : listaUbicaciones){
+                            @Override
+                            public void onNothingSelected(AdapterView<?> parent) {
 
+                            }
+                        });
+                    }
+                });
+            }
+        });
+    }
 
+    public void prepararListaUbicacion(final String fecha){
 
-                    }*/
-//                }
+        descUbicacion = new ArrayList<>();
+//        listaUbicacionSpinner = new ArrayList<>();
+                final List<Lotes> listaUbicaciones = MainActivity.myAppDB.myDao().getUbicacionesLotesByFecha(fecha);
+                if (listaUbicaciones.size() > 0){
+//                    listaUbicacionSpinner.addAll(listaUbicaciones);
+                    for (int i = 0; i < listaUbicaciones.size(); i++){
+//                                idUbicacion.add(listaUbicacion.get(i).getIdUbicacion());
+//                        System.out.println(listaUbicaciones.get(i).getDescUbicacionLote());
+                        descUbicacion.add(listaUbicaciones.get(i).getDescUbicacionLote());
+                    }
+
+                }else{
+                    descUbicacion.add("No tiene ubicaciones agregadas");
+                }
+                spinnerAdapterUbicacion = new ArrayAdapter<>(Objects.requireNonNull(getActivity()),android.R.layout.simple_list_item_1,descUbicacion);
+                ubicaciones.setAdapter(spinnerAdapterUbicacion);
+                ubicaciones.setSelection(0);
+
+                ubicaciones.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+                    @Override
+                    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                        prepareCalles(fecha, descUbicacion.get(position));
+                    }
+
+                    @Override
+                    public void onNothingSelected(AdapterView<?> parent) {
+
+                    }
+                });
+
+    }
+
+    private void prepareCalles(final String fecha, final String ubicacion) {
+
+        descCalles = new ArrayList<>();
+        final List<Lotes> listaCalles = MainActivity.myAppDB.myDao().getLotesByFechaAndUbicacion(fecha,ubicacion);
+        if (listaCalles.size() > 0){
+            for (int i = 0; i < listaCalles.size(); i++){
+                descCalles.add(listaCalles.get(i).getCalle()+"");
+            }
+
+        }else{
+            descCalles.add("No tiene calles agregadas");
+        }
+        spinnerAdapterCalles = new ArrayAdapter<>(Objects.requireNonNull(getActivity()),android.R.layout.simple_list_item_1,descCalles);
+        calles.setAdapter(spinnerAdapterCalles);
+        calles.setSelection(0);
+
+        calles.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                llenarLista(fecha, ubicacion, Integer.parseInt(descCalles.get(position)));
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
 
             }
-        }
+        });
 
 
-/*        // Adding child data
-        List<String> top250 = new ArrayList<String>();
-        top250.add("The Shawshank Redemption");
-        top250.add("The Godfather");
-        top250.add("The Godfather: Part II");
-        top250.add("Pulp Fiction");
-        top250.add("The Good, the Bad and the Ugly");
-        top250.add("The Dark Knight");
-        top250.add("12 Angry Men");
-
-        List<String> nowShowing = new ArrayList<String>();
-        nowShowing.add("The Conjuring");
-        nowShowing.add("Despicable Me 2");
-        nowShowing.add("Turbo");
-        nowShowing.add("Grown Ups 2");
-        nowShowing.add("Red 2");
-        nowShowing.add("The Wolverine");
-
-        List<String> comingSoon = new ArrayList<String>();
-        comingSoon.add("2 Guns");
-        comingSoon.add("The Smurfs 2");
-        comingSoon.add("The Spectacular Now");
-        comingSoon.add("The Canyons");
-        comingSoon.add("Europa Report");
 
 
-        for (int i = 0; i < listDataHeader.size(); i++){
-            Lotes lotes = new Lotes();
-            peliculas.setNombre(listDataHeader.get(i));
-            peliculas.setPeliculasList(top250);
-            listDataChild.put(peliculas.getNombre(), peliculas.getPeliculasList()); // Header, Child data
-        }*/
+
     }
+    public void llenarLista(String fecha, String ubicacion, int calle){
+
+        List<Lotes> listaLotes = MainActivity.myAppDB.myDao().getLotesByFechaUbicacionAndCalle(fecha, ubicacion, calle);
+
+        if (listaLotes.size()>0){
+            RecyclerlistaLotes.setHasFixedSize(true);
+            RecyclerView.LayoutManager lManager = new LinearLayoutManager(Objects.requireNonNull(getActivity()));
+            RecyclerlistaLotes.setLayoutManager(lManager);
+
+            arrlistaLote = new ArrayList<>();
+            for (Lotes lts : listaLotes){
+                Lotes lotes = new Lotes();
+                lotes.setFechaDispo(lts.getFechaDispo());
+                lotes.setLote(lts.getLote());
+                lotes.setUsuarioInventario(lts.getUsuarioInventario());
+                lotes.setFechaInventario(lts.getFechaInventario());
+                lotes.setIdUbicacionLote(lts.getIdUbicacionLote());
+                lotes.setCalle(lts.getCalle());
+                lotes.setEstado(lts.getEstado());
+                lotes.setDescUbicacionLote(lts.getDescUbicacionLote());
+                arrlistaLote.add(lotes);
+            }
+            adapterListaLotes = new AdaptadorListaLotes( arrlistaLote, new AdaptadorListaLotes.OnItemClickListener() {
+                @Override
+                public void onItemClick(Lotes item) {
+                }
+            });
+            RecyclerlistaLotes.setAdapter(adapterListaLotes);
+        }
+    }
+
+
+//    private void setExpandableListViewHeight(ExpandableListView listView) {
+//        try {
+//            ExpandableListAdapter listAdapter = (ExpandableListAdapter) listView.getExpandableListAdapter();
+//            int totalHeight = 0;
+//            for (int i = 0; i < listAdapter.getGroupCount(); i++) {
+//                View listItem = listAdapter.getGroupView(i, false, null, listView);
+////                int heightMeasureSpec = View.MeasureSpec.makeMeasureSpec(99999999, View.MeasureSpec.AT_MOST);
+//                listItem.measure(0, 0);
+//                totalHeight += listItem.getMeasuredHeight();
+//            }
+//
+//            ViewGroup.LayoutParams params = listView.getLayoutParams();
+//            int height = totalHeight + (listView.getDividerHeight() * (listAdapter.getGroupCount()));
+//            if (height < 10) height = 300;
+//            params.height = height;
+//            listView.setLayoutParams(params);
+//            listView.requestLayout();
+//            mScrollView.post(new Runnable() {
+//                public void run() {
+//                    mScrollView.fullScroll(ScrollView.FOCUS_UP);
+//                }
+//            });
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//    }
 }

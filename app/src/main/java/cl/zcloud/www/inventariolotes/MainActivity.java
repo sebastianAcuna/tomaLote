@@ -1,6 +1,8 @@
 package cl.zcloud.www.inventariolotes;
 
+import android.app.Activity;
 import android.arch.persistence.room.Room;
+import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
@@ -12,6 +14,8 @@ import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.TextView;
 
 import org.w3c.dom.Text;
@@ -86,6 +90,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     private void selectDrawerItem(MenuItem item){
+
         Class fragmentClass;
         switch (item.getItemId()){
             case R.id.l_menu_inicio:

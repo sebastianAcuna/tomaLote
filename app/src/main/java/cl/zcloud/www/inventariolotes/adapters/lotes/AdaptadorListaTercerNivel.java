@@ -26,6 +26,7 @@ public class AdaptadorListaTercerNivel extends BaseExpandableListAdapter {
         this._child = _child;
     }
 
+
     @Override
     public int getGroupCount() {
         return this._headers.size();
@@ -63,33 +64,38 @@ public class AdaptadorListaTercerNivel extends BaseExpandableListAdapter {
 
     @Override
     public View getGroupView(int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
-        LayoutInflater inflater = (LayoutInflater) _context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        if (inflater != null) {
-            convertView = inflater.inflate(R.layout.list_third_level, null);
-        }
-        TextView text = convertView.findViewById(R.id.lblListCalle);
-        String[] groupText = TextUtils.split((String) getGroup(groupPosition), "_");
-        text.setText("calle : " + groupText[1]);
+        if (convertView == null){
+            LayoutInflater inflater = (LayoutInflater) this._context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            if (inflater != null) {
+                convertView = inflater.inflate(R.layout.list_third_level, null);
+            }
+            TextView text = convertView.findViewById(R.id.lblListCalle);
+            TextView cant = convertView.findViewById(R.id.lblListCantidadCalle);
+            String[] groupText = TextUtils.split((String) getGroup(groupPosition), "_");
+//            String groupText = (String) getGroup(groupPosition);
+            String aMostrar = "Calle "+groupText[2];
+            String Cantidad = " Cantidad Lotes " + getChildrenCount(groupPosition);
 
+
+            text.setText(aMostrar);
+            cant.setText(Cantidad);
+        }
         return convertView;
     }
 
     @Override
     public View getChildView(int groupPosition, int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
 
-        if (convertView == null){
             LayoutInflater inflater = (LayoutInflater) this._context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            if (inflater != null) {
-                convertView = inflater.inflate(R.layout.list_fourth_level, null);
-            }
+            convertView = inflater.inflate(R.layout.list_fourth_level, null);
 
             TextView textView =  convertView.findViewById(R.id.lblListUbicacion);
-
+            TextView nlista =  convertView.findViewById(R.id.numeroLista);
             String childArray = (String) getChild(groupPosition,childPosition);
-
+//            String childArrays = (String) _child.get(_headers.get(groupPosition)).get(childPosition);
+            String nmlista = getChildId(groupPosition,childPosition)+ 1 +"";
             textView.setText(childArray);
-        }
-
+            nlista.setText(nmlista);
         return convertView;
     }
 

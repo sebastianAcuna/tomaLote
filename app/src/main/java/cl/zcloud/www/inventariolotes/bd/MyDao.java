@@ -43,19 +43,17 @@ public interface MyDao {
     @Query("SELECT * FROM lotes GROUP BY fecha_inventario")
     public List<Lotes> getFechasLotes();
 
-    @Query("SELECT desc_ubicacion_lote FROM lotes WHERE fecha_inventario = :fecha GROUP BY desc_ubicacion_lote ORDER BY desc_ubicacion_lote ASC")
-    public List<String> getUbicacionesLotesByFecha(String fecha);
+    @Query("SELECT * FROM lotes WHERE fecha_inventario = :fecha GROUP BY desc_ubicacion_lote ORDER BY desc_ubicacion_lote ASC")
+    public List<Lotes> getUbicacionesLotesByFecha(String fecha);
 
-    @Query("SELECT * FROM lotes WHERE fecha_inventario = :fecha AND desc_ubicacion_lote = :ubicacion ORDER BY fecha_inventario DESC")
+    @Query("SELECT * FROM lotes WHERE fecha_inventario = :fecha AND desc_ubicacion_lote = :ubicacion GROUP BY calle ORDER BY fecha_inventario DESC")
     public List<Lotes> getLotesByFechaAndUbicacion(String fecha, String ubicacion);
 
-    @Query("SELECT lote FROM lotes WHERE fecha_inventario = :fecha AND desc_ubicacion_lote = :ubicacion AND calle = :calle ORDER BY fecha_inventario DESC")
-    public List<String> getLotesByFechaUbicacionAndCalle(String fecha, String ubicacion, int calle);
-
+    @Query("SELECT * FROM lotes WHERE fecha_inventario = :fecha AND desc_ubicacion_lote = :ubicacion AND calle = :calle ORDER BY fecha_inventario DESC")
+    public List<Lotes> getLotesByFechaUbicacionAndCalle(String fecha, String ubicacion, int calle);
 
     @Query("SELECT * FROM lotes WHERE estado = :estado ")
     public List<Lotes> getLotesByEstado(int estado);
-
 
     @Query("SELECT count(estado) FROM lotes WHERE estado = :numero ")
     public int getCountLotesByEstado(int numero);

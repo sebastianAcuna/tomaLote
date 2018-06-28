@@ -2,8 +2,10 @@ package cl.zcloud.www.inventariolotes.fragments;
 
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.DatePickerDialog;
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.Context;
@@ -13,6 +15,7 @@ import android.content.SharedPreferences;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.media.SoundPool;
+import android.nfc.Tag;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
@@ -22,7 +25,9 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 
 import android.support.v7.app.AlertDialog;
+import android.text.Editable;
 import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -60,6 +65,7 @@ import cl.zcloud.www.inventariolotes.clases.Lotes;
 import cl.zcloud.www.inventariolotes.clases.Ubicacion;
 import es.dmoral.toasty.Toasty;
 
+import static android.content.ContentValues.TAG;
 import static android.content.Context.AUDIO_SERVICE;
 import static android.content.Context.MODE_PRIVATE;
 
@@ -80,18 +86,23 @@ public class tomaExistenciaFragment extends Fragment {
 //    bluethooth
     static Handler bluetoothIn;
     final int handlerState = 0;//used to identify handler message
-    private BluetoothAdapter btAdapter = null;
+
     private BluetoothSocket btSocket = null;
     private StringBuilder recDataString = new StringBuilder();
 
-    private ConnectedThread mConnectedThread;
+
 
     // SPP UUID service - this should work for most devices
     private static final UUID BTMODULEUUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
 
     // String for MAC address
-    private static String address = null;
+//    private static String address = null;
 
+private static BluetoothDevice adress;
+
+    private BluetoothAdapter btAdapter;
+    public static int REQUEST_BLUETOOTH = 1;
+    private ArrayList<BluetoothClass.Device> deviceItemList;
 
     Vibrator v;
 /*    public MediaPlayer correct;
@@ -119,11 +130,7 @@ public class tomaExistenciaFragment extends Fragment {
         lbl_mensaje = (TextView) view.findViewById(R.id.lbl_mensaje);
         usuario = (EditText) view.findViewById(R.id.et_usuario);
 
-/*        correct = new SoundPool(8, AudioManager.STREAM_MUSIC, 0);
-        alert = new SoundPool(8, AudioManager.STREAM_MUSIC, 0);
-        incorrect = new SoundPool(8, AudioManager.STREAM_MUSIC, 0);*/
-
-// Set the hardware buttons to control the music
+// Set the hardwae buttons to control the music
         Objects.requireNonNull(getActivity()).setVolumeControlStream(AudioManager.STREAM_MUSIC);
 // Load the sound
         soundPool = new SoundPool(10, AudioManager.STREAM_MUSIC, 0);
@@ -140,6 +147,25 @@ public class tomaExistenciaFragment extends Fragment {
 
 
 
+        lote.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if (s.length() >= 11){
+                    hideKeyboard(Objects.requireNonNull(getActivity()));
+                    validarCampos();
+                }
+            }
+        });
 
 
         llenarSpinner();
@@ -157,6 +183,7 @@ public class tomaExistenciaFragment extends Fragment {
             calle.setText(calle_remember + "");
             lote.setText(lote_remember);
         }
+
 
 
 
@@ -179,9 +206,10 @@ public class tomaExistenciaFragment extends Fragment {
                 boolean handled = false;
                 if (actionId == EditorInfo.IME_ACTION_DONE) {
                     validarCampos();
-                    InputMethodManager imm = (InputMethodManager) Objects.requireNonNull(getActivity()).getSystemService(
-                            Context.INPUT_METHOD_SERVICE);
-                    imm.hideSoftInputFromWindow(lote.getApplicationWindowToken(), 0);
+                    InputMethodManager imm = (InputMethodManager) Objects.requireNonNull(getActivity()).getSystemService( Context.INPUT_METHOD_SERVICE);
+                    if (imm != null) {
+                        imm.hideSoftInputFromWindow(lote.getApplicationWindowToken(), 0);
+                    }
                     /* Write your logic here that will be executed when user taps next button */
                     handled = true;
                 }
@@ -189,158 +217,32 @@ public class tomaExistenciaFragment extends Fragment {
             }
         });
 
-                bluetoothIn = new Handler() {
-                    public void handleMessage(android.os.Message msg) {
-                        if (msg.what == handlerState) {	//if message is what we want
-                            String readMessage = (String) msg.obj; // msg.arg1 = bytes from connect thread
 
-                            lote.setText(readMessage);
-
-                            if (!TextUtils.isEmpty(lote.getText())){
-                                validarCampos();
-                            }
-//                    recDataString.append(readMessage); //keep appending to string until ~
-//                    int endOfLineIndex = recDataString.indexOf("~"); // determine the end-of-line
-/*                    if (endOfLineIndex > 0) { // make sure there data before ~
-                        String dataInPrint = recDataString.substring(0, endOfLineIndex);  // extract string
-                        lote.setText("Datos recibidos = " + dataInPrint);
-                        int dataLength = dataInPrint.length();	//get length of data received
-                        usuario.setText("Tamaño del String = " + String.valueOf(dataLength));
-
-                        *//*if (recDataString.charAt(0) == '#')	//if it starts with # we know it is what we are looking for
-                        {
-                            String sensor0 = recDataString.substring(1, 5);             //get sensor value from string between indices 1-5
-                            String sensor1 = recDataString.substring(6, 10);            //same again...
-                            String sensor2 = recDataString.substring(11, 15);
-                            String sensor3 = recDataString.substring(16, 20);
-                            //sensorView3.setText(" Sensor 3 Voltage = " + sensor3 + "V");
-                        }*//*
-                        recDataString.delete(0, recDataString.length()); 					//clear all string data
-                        // strIncom =" ";
-                        dataInPrint = " ";
-                    }*/
-                        }
-                    }
-                };
-
-                btAdapter = BluetoothAdapter.getDefaultAdapter();       // get Bluetooth adapter
-                if (checkBTState()){
-                    comprobarPareja();
-                }
+        btAdapter = BluetoothAdapter.getDefaultAdapter();       // get Bluetooth adapter
+        checkBTState();
 
 
         return view;
     }
 
-    private BluetoothSocket createBluetoothSocket(BluetoothDevice device) throws IOException {
+    public static void hideKeyboard(Context ctx) {
+        InputMethodManager inputManager = (InputMethodManager) ctx
+                .getSystemService(Context.INPUT_METHOD_SERVICE);
 
-        return  device.createRfcommSocketToServiceRecord(BTMODULEUUID);
-        //creates secure outgoing connecetion with BT device using UUID
+        // check if no view has focus:
+        View v = ((Activity) ctx).getCurrentFocus();
+        if (v == null)
+            return;
+
+        inputManager.hideSoftInputFromWindow(v.getWindowToken(), 0);
     }
 
     @SuppressLint("HandlerLeak")
     @Override
     public void onResume() {
         super.onResume();
-
-        if (checkBTState()){
-            comprobarPareja();
-        }
-
-
-        bluetoothIn = new Handler() {
-            public void handleMessage(android.os.Message msg) {
-                if (msg.what == handlerState) {	//if message is what we want
-                    String readMessage = (String) msg.obj; // msg.arg1 = bytes from connect thread
-
-                    lote.setText(readMessage);
-
-                    if (!TextUtils.isEmpty(lote.getText())){
-                        validarCampos();
-                    }
-//                    recDataString.append(readMessage); //keep appending to string until ~
-//                    int endOfLineIndex = recDataString.indexOf("~"); // determine the end-of-line
-/*                    if (endOfLineIndex > 0) { // make sure there data before ~
-                        String dataInPrint = recDataString.substring(0, endOfLineIndex);  // extract string
-                        lote.setText("Datos recibidos = " + dataInPrint);
-                        int dataLength = dataInPrint.length();	//get length of data received
-                        usuario.setText("Tamaño del String = " + String.valueOf(dataLength));
-
-                        *//*if (recDataString.charAt(0) == '#')	//if it starts with # we know it is what we are looking for
-                        {
-                            String sensor0 = recDataString.substring(1, 5);             //get sensor value from string between indices 1-5
-                            String sensor1 = recDataString.substring(6, 10);            //same again...
-                            String sensor2 = recDataString.substring(11, 15);
-                            String sensor3 = recDataString.substring(16, 20);
-                            //sensorView3.setText(" Sensor 3 Voltage = " + sensor3 + "V");
-                        }*//*
-                        recDataString.delete(0, recDataString.length()); 					//clear all string data
-                        // strIncom =" ";
-                        dataInPrint = " ";
-                    }*/
-                }
-            }
-        };
-        //Get MAC address from DeviceListActivity via intent
-//        Intent intent = Objects.requireNonNull(getActivity()).getIntent();
-
-        //Get the MAC address from the DeviceListActivty via EXTRA
-//        address = intent.getStringExtra(DeviceListActivity.EXTRA_DEVICE_ADDRESS);
-
-        //create device and set the MAC address
-        //Log.i("ramiro", "adress : " + address);
-
-
-        //I send a character when resuming.beginning transmission to check device is connected
-        //If it is not an exception will be thrown in the write method and finish() will be called
-//        mConnectedThread.write("x");
+            checkBTState();
     }
-
-
-    public void comprobarPareja(){
-        // Get a set of currently paired devices and append to 'pairedDevices'
-        Set<BluetoothDevice> pairedDevices = btAdapter.getBondedDevices();
-
-        // Add previosuly paired devices to the array
-        if (pairedDevices.size() > 0) {
-            for (BluetoothDevice btd : pairedDevices){
-                address = btd.getAddress();
-            }
-            echarAndarBT();
-            Toasty.success(Objects.requireNonNull(getActivity()),"Emparejado ", Toast.LENGTH_SHORT,true).show();
-        } else {
-            Toasty.error(Objects.requireNonNull(getActivity()),"Sin pareja ", Toast.LENGTH_SHORT,true).show();
-        }
-    }
-
-
-
-    public void echarAndarBT(){
-        BluetoothDevice device = btAdapter.getRemoteDevice(address);
-
-        try {
-            btSocket = createBluetoothSocket(device);
-        } catch (IOException e) {
-            Toasty.error(Objects.requireNonNull(getActivity()).getBaseContext(), "La creacción del Socket fallo", Toast.LENGTH_LONG,true).show();
-        }
-        // Establish the Bluetooth socket connection.
-        try
-        {
-            btSocket.connect();
-        } catch (IOException e) {
-            try
-            {
-                btSocket.close();
-            } catch (IOException e2)
-            {
-                Toasty.error(Objects.requireNonNull(getActivity()).getBaseContext(), "La creacción del Socket fallo intento n°2", Toast.LENGTH_LONG,true).show();
-                //insert code to deal with this
-            }
-        }
-        mConnectedThread = new ConnectedThread(btSocket);
-        mConnectedThread.start();
-    }
-
 
     @Override
     public void onPause()
@@ -349,13 +251,15 @@ public class tomaExistenciaFragment extends Fragment {
 
         v = null;
         if (checkBTState()){
-            try
-            {
-                //Don't leave Bluetooth sockets open when leaving activity
-                btSocket.close();
-            } catch (IOException e2) {
-                //insert code to deal with this
+            if (btSocket != null){
+                try
+                {
+                    btSocket.close();
+                } catch (IOException e2) {
+                    System.out.println("error de socket " + e2.getLocalizedMessage());
+                }
             }
+
         }
 
     }
@@ -369,61 +273,15 @@ public class tomaExistenciaFragment extends Fragment {
             if (btAdapter.isEnabled()) {
                 return true;
             } else {
-                Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-                startActivityForResult(enableBtIntent, 1);
+                Intent enableBT = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+                startActivityForResult(enableBT, REQUEST_BLUETOOTH);
                 return true;
             }
         }
     }
 
 
-    //create new class for connect thread
-    private class ConnectedThread extends Thread {
-        private final InputStream mmInStream;
-        private final OutputStream mmOutStream;
 
-        //creation of the connect thread
-        ConnectedThread(BluetoothSocket socket) {
-            InputStream tmpIn = null;
-            OutputStream tmpOut = null;
-            try {
-                //Create I/O streams for connection
-                tmpIn = socket.getInputStream();
-                tmpOut = socket.getOutputStream();
-            } catch (IOException ignored) { Toasty.info(Objects.requireNonNull(getActivity()),"Se perdio la conexión con el dispositivo", Toast.LENGTH_SHORT,false).show();  }
-
-            mmInStream = tmpIn;
-            mmOutStream = tmpOut;
-        }
-
-        public void run() {
-            byte[] buffer = new byte[256];
-            int bytes;
-            // Keep looping to listen for received messages
-            while (true) {
-                try {
-                    bytes = mmInStream.read(buffer);        	//read bytes from input buffer
-                    String readMessage = new String(buffer, 0, bytes);
-                    // Send the obtained bytes to the UI Activity via handler
-                    bluetoothIn.obtainMessage(handlerState, bytes, -1, readMessage).sendToTarget();
-                } catch (IOException e) {
-                    break;
-                }
-            }
-        }
-        //write method
-        public void write(String input) {
-            byte[] msgBuffer = input.getBytes();           //converts entered String into bytes
-            try {
-                mmOutStream.write(msgBuffer);                //write bytes over BT connection via outstream
-            } catch (IOException e) {
-                //if you cannot write, close the application
-                Toast.makeText(Objects.requireNonNull(getActivity()).getBaseContext(), "La Conexión fallo", Toast.LENGTH_LONG).show();
-                Objects.requireNonNull(getActivity()).finish();
-
-            }
-        }
-    }
 
 
     public void llenarSpinner(){
@@ -536,18 +394,20 @@ public class tomaExistenciaFragment extends Fragment {
 
                                         lbl_mensaje.setBackgroundColor(getResources().getColor(R.color.warning));
                                         lbl_mensaje.setTextColor(getResources().getColor(R.color.black));
-                                        lbl_mensaje.setText(R.string.mnsj_lbl_warning);
+                                        String texto = "REPETIDO ! \nLote ya ingresado para este inventario\n"+ lote.getText();
+                                        lbl_mensaje.setText(texto);
+                                        lote.setText("");
 //                                        Toasty.warning(Objects.requireNonNull(getActivity()), "Lote ya ingresado para este inventario", Toast.LENGTH_SHORT, true).show();
 
                                         v = null;
                                     } else {
                                         SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss", Locale.getDefault());
                                         Date da = new Date();
-                                        final String fechaFinal = df.format(da);
+                                        final String fechaFinalDispo = df.format(da);
 
 
                                         Lotes lotes = new Lotes();
-                                        lotes.setFechaDispo(fechaFinal);
+                                        lotes.setFechaDispo(fechaFinalDispo);
                                         lotes.setCalle(Integer.parseInt(calle.getText().toString()));
                                         lotes.setDescUbicacionLote(nombreUbicacion);
                                         lotes.setFechaInventario(fechaFinal);
@@ -599,10 +459,12 @@ public class tomaExistenciaFragment extends Fragment {
                     editor.putInt("remember_estado", 1);
                     editor.putString("remember_lote", lote.getText().toString());
                     editor.apply();
+
                     lbl_mensaje.setBackgroundColor(getResources().getColor(R.color.danger));
                     lbl_mensaje.setTextColor(getResources().getColor(R.color.whiteText));
                     String texto = " ERROR! \nERROR DE FORMATO EN ETIQUETA\n"+ lote.getText();
                     lbl_mensaje.setText(texto);
+                    lote.setText("");
 //                    Toasty.error(Objects.requireNonNull(getActivity()), "ERROR DE FORMATO EN ETIQUETA", Toast.LENGTH_SHORT, true).show();
                     showAlertForBloqueo();
 //                    v.cancel();
