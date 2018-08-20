@@ -30,6 +30,13 @@ public interface MyDao {
     @Query("SELECT id_ubicacion, descripcion_ubicacion FROM ubicacion ORDER BY descripcion_ubicacion DESC")
     public List<Ubicacion> getUbicacionOrderDesc();
 
+    @Query("UPDATE ubicacion SET descripcion_ubicacion = :newUbicacion WHERE descripcion_ubicacion = :oldUbicacion")
+    public int updateUbicacionList(String newUbicacion, String oldUbicacion);
+
+
+    @Query("DELETE FROM ubicacion")
+    public int deleteUbicaciones();
+
 //    ============================================================================
 
 //   LOTES
@@ -46,11 +53,17 @@ public interface MyDao {
     @Query("SELECT * FROM lotes WHERE fecha_inventario = :fecha GROUP BY desc_ubicacion_lote ORDER BY desc_ubicacion_lote ASC")
     public List<Lotes> getUbicacionesLotesByFecha(String fecha);
 
-    @Query("SELECT * FROM lotes WHERE fecha_inventario = :fecha AND desc_ubicacion_lote = :ubicacion GROUP BY calle ORDER BY fecha_inventario DESC")
+    @Query("SELECT id_lote, id_ubicacion_lote, calle, COUNT(lote) as estado , fecha_inventario, desc_ubicacion_lote FROM lotes WHERE fecha_inventario = :fecha AND desc_ubicacion_lote = :ubicacion GROUP BY calle ORDER BY fecha_inventario DESC")
     public List<Lotes> getLotesByFechaAndUbicacion(String fecha, String ubicacion);
+
+    @Query("SELECT id_lote, id_ubicacion_lote, calle, COUNT(lote) as estado , fecha_inventario, desc_ubicacion_lote FROM lotes WHERE fecha_inventario = :fecha GROUP BY calle ORDER BY fecha_inventario DESC")
+    public List<Lotes> getLotesByFecha(String fecha);
 
     @Query("SELECT * FROM lotes WHERE fecha_inventario = :fecha AND desc_ubicacion_lote = :ubicacion AND calle = :calle ORDER BY fecha_inventario DESC")
     public List<Lotes> getLotesByFechaUbicacionAndCalle(String fecha, String ubicacion, int calle);
+
+    @Query("SELECT * FROM lotes WHERE fecha_inventario = :fecha AND calle = :calle ORDER BY fecha_inventario DESC")
+    public List<Lotes> getLotesByFechaAndCalle(String fecha, int calle);
 
     @Query("SELECT * FROM lotes WHERE estado = :estado ")
     public List<Lotes> getLotesByEstado(int estado);
@@ -60,6 +73,15 @@ public interface MyDao {
 
     @Query("SELECT * FROM lotes")
     public List<Lotes> getLotes();
+
+    @Query("UPDATE lotes SET estado = 1 WHERE estado = 0 ")
+    public int updateLotes();
+
+    @Query("UPDATE lotes SET desc_ubicacion_lote = :newUbicacion WHERE desc_ubicacion_lote = :oldUbicacion  AND fecha_inventario = :fecha ")
+    public int updateLotesByUbicacion(String newUbicacion, String oldUbicacion, String fecha);
+
+    @Query("UPDATE lotes SET calle = :newCalle WHERE calle = :oldCalle AND  desc_ubicacion_lote = :ubicacion AND fecha_inventario = :fecha ")
+    public int updateLotesByCalle(int newCalle, int oldCalle, String ubicacion, String fecha);
 
     @Query("DELETE FROM lotes")
     public int deleteLotes();

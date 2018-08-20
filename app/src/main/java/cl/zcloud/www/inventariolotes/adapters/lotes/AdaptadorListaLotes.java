@@ -1,15 +1,12 @@
-package cl.zcloud.www.inventariolotes.adapters;
+package cl.zcloud.www.inventariolotes.adapters.lotes;
 
-import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseExpandableListAdapter;
 import android.widget.TextView;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import cl.zcloud.www.inventariolotes.R;
 import cl.zcloud.www.inventariolotes.clases.Lotes;
@@ -42,18 +39,28 @@ public class AdaptadorListaLotes extends RecyclerView.Adapter<AdaptadorListaLote
     }
 
 
-    public static class ViewHolder extends RecyclerView.ViewHolder {
-        public TextView lote, numeroLista;
+    static class ViewHolder extends RecyclerView.ViewHolder {
+        private TextView lote, numeroLista, ubicacion, fecha, calle;
 
-        public ViewHolder( View tv) {
+        ViewHolder(View tv) {
             super(tv);
             lote = tv.findViewById(R.id.lblListUbicacion);
             numeroLista = tv.findViewById(R.id.numeroLista);
+            ubicacion = tv.findViewById(R.id.label_ubicacion);
+            fecha = tv.findViewById(R.id.label_fecha);
+            calle = tv.findViewById(R.id.label_calle);
         }
 
-        public void bind(final Lotes item, final OnItemClickListener listener, int position){
+        void bind(final Lotes item, final OnItemClickListener listener, int position){
+            String positions = (position + 1 )+"";
+            String calles = item.getCalle()+"";
+
+
             lote.setText(item.getLote());
-            numeroLista.setText(position+"");
+            numeroLista.setText(positions);
+            calle.setText(calles);
+            ubicacion.setText(item.getDescUbicacionLote());
+            fecha.setText(item.getFechaInventario());
 
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override

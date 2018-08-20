@@ -2,7 +2,6 @@
 <android.support.constraint.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -23,6 +22,7 @@
 
     <TextView
         android:id="@+id/textView5"
+        android:textColor="@color/black"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
@@ -33,6 +33,7 @@
 
 
     <LinearLayout
+        android:id="@+id/linearLayout2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
@@ -45,38 +46,66 @@
 
         <Button
             android:id="@+id/btn_delete_all"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/btn_deleteAll"
             android:background="@color/materialSemiBlue"
-            android:textColor="@color/whiteText"
-            android:padding="10sp"
+            android:text="@string/btn_deleteAll"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/button2" />
+            app:layout_constraintTop_toBottomOf="@+id/button2"
+            style="@style/white_text_buttons"/>
 
         <Button
             android:id="@+id/btn_delete_sinc"
-            android:layout_marginTop="5sp"
-            android:padding="10sp"
-            android:textColor="@color/whiteText"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@color/materialDarkBlue"
             android:text="@string/btn_deleteCON"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/button" />
+            app:layout_constraintTop_toBottomOf="@+id/button"
+            style="@style/white_text_buttons"/>
 
         <Button
             android:id="@+id/btn_delete_no_sinc"
-            android:layout_marginTop="5sp"
-            android:padding="10sp"
-            android:layout_width="wrap_content"
-            android:textColor="@color/whiteText"
-            android:background="@color/materialLightBlue"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:background="@color/materialLightBlue"
             android:text="@string/btn_deleteSIN"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/textView5" />
+            app:layout_constraintTop_toBottomOf="@+id/textView5"
+            style="@style/white_text_buttons"/>
+    </LinearLayout>
+
+
+    <TextView
+        android:id="@+id/textView9"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:textColor="@color/black"
+        android:text="@string/label_ubicaciones"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/linearLayout2" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:gravity="center_horizontal"
+        android:orientation="vertical"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView9">
+
+        <Button
+            android:id="@+id/btn_delete_ubicaciones"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/btn_deleteUbica"
+            android:background="@color/danger"
+            style="@style/white_text_buttons"/>
     </LinearLayout>
 
 </android.support.constraint.ConstraintLayout>

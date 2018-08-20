@@ -1,12 +1,14 @@
 package cl.zcloud.www.inventariolotes.fragments;
 
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -20,8 +22,11 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 
 import cl.zcloud.www.inventariolotes.MainActivity;
@@ -43,6 +48,8 @@ public class homeFragment extends Fragment {
     private APIService apiService;
     private TextView lbl_total_registros;
     ProgressDialog dialog;
+    String myIMEI;
+    @SuppressLint("HardwareIds")
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -55,6 +62,7 @@ public class homeFragment extends Fragment {
 
        mostrarCountRegistros();
 
+        myIMEI  = Settings.Secure.getString(Objects.requireNonNull(getActivity()).getApplicationContext().getContentResolver(), Settings.Secure.ANDROID_ID);
 
         btn_subir_lotes.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -62,11 +70,6 @@ public class homeFragment extends Fragment {
                 prepararSubir();
             }
         });
-
-       /* InputMethodManager imm = (InputMethodManager) Objects.requireNonNull(getActivity()).getSystemService(INPUT_METHOD_SERVICE);
-        if (imm != null) {
-            imm.hideSoftInputFromWindow(Objects.requireNonNull(getView()).getWindowToken(), 0);
-        }*/
 
        hideKeyboard(Objects.requireNonNull(getActivity()));
 
@@ -126,7 +129,7 @@ public class homeFragment extends Fragment {
         boolean exito;
         @Override
         protected void onPreExecute () {
-            dialog = new ProgressDialog(getActivity());
+            dialog = new ProgressDialog(Objects.requireNonNull(getActivity()));
             // preparamos el cuadro de dialogo
             dialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
             dialog.setMessage("Subiendo lotes al servidor");
@@ -138,9 +141,27 @@ public class homeFragment extends Fragment {
         protected Boolean doInBackground(Void... voids) {
 
             ArrayList<Lotes> confl = new ArrayList<>();
-            List<Lotes> cnf = MainActivity.myAppDB.myDao().getLotesByEstado(1);
+            List<Lotes> cnf = MainActivity.myAppDB.myDao().getLotesByEstado(0);
+            SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.getDefault());
+            Date da = new Date();
+            final String fechaFinalDispo = df.format(da);
 
             if (cnf.size() > 0){
+                for (Lotes lts : cnf){
+                    Lotes lotes = new Lotes();
+                    lotes.setDescUbicacionLote(lts.getDescUbicacionLote());
+                    lotes.setCalle(lts.getCalle());
+                    lotes.setEstado(lts.getEstado());
+                    lotes.setIdUbicacionLote(lts.getIdUbicacionLote());
+                    lotes.setFechaInventario(lts.getFechaInventario());
+                    lotes.setUsuarioInventario(lts.getUsuarioInventario());
+                    lotes.setLote(lts.getLote());
+                    lotes.setFechaDispo(lts.getFechaDispo());
+                    lotes.setIdLotes(lts.getIdLotes());
+                    lotes.setImei(lts.getImei());
+                    lotes.setFecha_subida(fechaFinalDispo);
+                    confl.add(lotes);
+                }
                 apiService = RetrofitClient.getClient().create(APIService.class);
                 Call<RespuestaPost> call = apiService.setLotes(confl);
 
@@ -150,7 +171,8 @@ public class homeFragment extends Fragment {
                         RespuestaPost respuesta = response.body();
                         if(respuesta != null){
                             if(respuesta.getEstado() == 1){
-                                Toasty.success(Objects.requireNonNull(getActivity()), " :) ", Toast.LENGTH_SHORT, true).show();
+                                Toasty.info(Objects.requireNonNull(getActivity()), " se actualizó con exito ", Toast.LENGTH_SHORT, true).show();
+                                actualizarLotes();
                             }else{
                                 Toast.makeText(getActivity(), "No se ha insertado la id del dispositivo al servidor", Toast.LENGTH_SHORT).show();
                             }
@@ -184,6 +206,23 @@ public class homeFragment extends Fragment {
         }
     }
 
+
+    public void actualizarLotes(){
+        try{
+            int id = MainActivity.myAppDB.myDao().updateLotes();
+            if (id > 0){
+                mostrarCountRegistros();
+                Toasty.success(Objects.requireNonNull(getActivity()), "Lotes locales actualizados con exito", Toast.LENGTH_SHORT, true).show();
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+            Toasty.error(Objects.requireNonNull(getActivity()), "Algo sucedió", Toast.LENGTH_SHORT,true).show();
+        }
+    }
+
+
+
+
     private void showAlertForBloqueo(String title, String message, final int accion){
         View viewInfalted = LayoutInflater.from(Objects.requireNonNull(getActivity())).inflate(R.layout.alert_empty,null);
 
@@ -194,9 +233,8 @@ public class homeFragment extends Fragment {
                 .setPositiveButton("Aceptar", new DialogInterface.OnClickListener(){
                     @Override
                     public void onClick(DialogInterface dialogInterface, int i) {
-
                     }
-                }).create();
+                }).setNegativeButton("cancelar",null).create();
 
         builder.setOnShowListener(new DialogInterface.OnShowListener() {
             @Override
@@ -208,7 +246,8 @@ public class homeFragment extends Fragment {
                         if (accion == 0){
                             builder.dismiss();
                         }else if (accion == 1){
-                            new ejecutarSubir();
+                            new ejecutarSubir().execute();
+                            builder.dismiss();
                         }
 
                     }

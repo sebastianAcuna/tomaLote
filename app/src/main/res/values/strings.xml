@@ -1,9 +1,8 @@
 <resources>
     <string name="app_name">Inventario de Lotes</string>
 
+    <!--MENU LATERAL -->
     <string name="header_image_description">Imagen de fondo</string>
-
-
     <string name="left_menu_home">Inicio</string>
     <string name="left_menu_add">Agregar Lote </string>
     <string name="left_menu_list">Listar Lotes</string>
@@ -11,70 +10,45 @@
     <string name="left_menu_sub_item">Configuración</string>
     <string name="left_menu_herr_admin">Herramientas de administración</string>
 
-    
-    
 
-
-
-
-    <!-- HOME FRAGMENT-->
-    <!--================================================================-->
-    <string name="lbl_title_home_fragment" > Total Registros </string>
-    <string name="btn_subir_lotes_home_fragment" > subir registros </string>
-    <!--================================================================-->
-
-    <!-- TOMA LECTURA FRAGMENT-->
-    <!--================================================================-->
-    <!--MENSAJES DE ESTADO EN LBL-->
+    <!-- MENSAJES -->
     <string name="mnsj_lbl_success" > OK! </string>
     <string name="mnsj_lbl_warning" > REPETIDO ! \nLote ya ingresado para este inventario </string>
     <string name="mnsj_lbl_danger" > ERROR! \nERROR DE FORMATO EN ETIQUETA </string>
 
-    <!--HINT DE EDIT TEXT-->
+
+    <!--ALERTAS-->
+    <string name="lblDelete" > ¿ Esta usted seguro que desea ELIMINAR esta ubicacion ?</string>
+
+    <!--HINTS-->
+    <string name="hint_lbl_ubicacion_mant"> Ingrese la ubicación </string>
+    <string name="password"> Ingrese la contraseña </string>
     <string name="hint_lbl_fecha" > Fecha </string>
     <string name="hint_lbl_usuario" > Usuario </string>
     <string name="hint_lbl_calle" > Calle </string>
     <string name="hint_lbl_lote" > Lote </string>
     <string name="label_ubicacion" > Ubicación </string>
+    <string name="texto_a_editar">Texto a editar</string>
 
 
-    <!--================================================================-->
-
-
-
-    <!--MANTENEDOR UBICACION FRAGMENT-->
-    <!--================================================================-->
-    <!-- HINT EDIT TEXT-->
-    <string name="hint_lbl_ubicacion_mant" > Ingrese la ubicación </string>
-
-
-    <!--MANTENEDOR UBICACION LAYOUT-->
-    <string name="editIcon" > Editar elemento </string>
-
-
-    <!--ALERTS DELETE-->
-    <string name="lblDelete" > ¿ Esta usted seguro que desea ELIMINAR esta ubicacion ?</string>
-
-
-
-
-    <!--================================================================-->
-
-
-    <!--ADMIN  FRAGMENT-->
-    <!--================================================================-->
+    <!--BUTTONS-->
     <string name="btn_deleteAll" > Eliminar todo los lotes </string>
     <string name="btn_deleteCON" > Eliminar SOLO lotes sincronizados </string>
     <string name="btn_deleteSIN" > Eliminar SOLO lotes sin sincronizar</string>
+    <string name="btn_deleteUbica" > Eliminar ubicaciones </string>
+    <string name="editIcon" > Editar elemento </string>
+    <string name="btn_subir_lotes_home_fragment" > subir registros </string>
+    <string name="botonadd">botonAdd</string>
 
-
-
-
-
+    <!--LABELS-->
+    <string name="label_number_lote" > N° </string>
+    <string name="label_lote_lote">Lote :</string>
+    <string name="label_calle_lote">Calle :</string>
     <string name="label_lotes" > LOTES </string>
+    <string name="label_ubicaciones" > UBICACIONES </string>
     <string name="label_title" > ADMINISTRACION DE DATOS EN LA APP</string>
+    <string name="lbl_title_home_fragment" > Total Registros </string>
 
 
 
-    <!--================================================================-->
 </resources>

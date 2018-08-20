@@ -1,16 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    >
+    xmlns:android="http://schemas.android.com/apk/res/android" >
     <ImageView
         android:layout_width="match_parent"
         android:layout_height="200dp"
         android:scaleType="centerCrop"
         android:contentDescription="@string/header_image_description"
         android:background="@drawable/background_llasa"
-        android:saveEnabled="true"/>
+        android:saveEnabled="true" />
 
     <TextView
         android:id="@+id/titulo_img_header"
@@ -23,6 +22,5 @@
         android:background="@color/transparentBlack"
         android:layout_gravity="bottom"
         android:layout_marginBottom="10sp"/>
-
 
 </FrameLayout>

@@ -36,7 +36,6 @@ import cl.zcloud.www.inventariolotes.fragments.tomaExistenciaFragment;
 public class MainActivity extends AppCompatActivity {
 
     private DrawerLayout mDrawerLayout;
-    private TextView lblHeader;
 
     public static MyAppDB myAppDB;
 
@@ -57,7 +56,7 @@ public class MainActivity extends AppCompatActivity {
         mDrawerLayout = findViewById(R.id.left_menu_main);
         NavigationView navigationView = findViewById(R.id.navigation_view);
 
-        lblHeader = navigationView.getHeaderView(0).findViewById(R.id.titulo_img_header);
+        TextView lblHeader = navigationView.getHeaderView(0).findViewById(R.id.titulo_img_header);
 
         SimpleDateFormat dt = new SimpleDateFormat("dd-MM-yyyy", Locale.getDefault());
         Date dts = new Date();
@@ -144,10 +143,24 @@ public class MainActivity extends AppCompatActivity {
         switch (item.getItemId()){
             case android.R.id.home:
                 mDrawerLayout.openDrawer(GravityCompat.START);
+                hideKeyboard(this);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
 
+    }
+
+
+    public static void hideKeyboard(Context ctx) {
+        InputMethodManager inputManager = (InputMethodManager) ctx
+                .getSystemService(Context.INPUT_METHOD_SERVICE);
+
+        // check if no view has focus:
+        View v = ((Activity) ctx).getCurrentFocus();
+        if (v == null)
+            return;
+
+        inputManager.hideSoftInputFromWindow(v.getWindowToken(), 0);
     }
 }

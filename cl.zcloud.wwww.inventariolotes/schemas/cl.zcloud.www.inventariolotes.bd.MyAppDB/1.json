@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "7605b032bf28fbdd6021d621d75e7ea5",
+    "identityHash": "153bb6f78397dcf37aa2f3a0f813aa4f",
     "entities": [
       {
         "tableName": "ubicacion",
@@ -32,7 +32,7 @@
       },
       {
         "tableName": "lotes",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id_lote` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `fecha_inventario` TEXT, `usuario_inventario` TEXT, `id_ubicacion_lote` INTEGER NOT NULL, `desc_ubicacion_lote` TEXT, `calle` INTEGER NOT NULL, `lote` TEXT, `estado` INTEGER NOT NULL, `fecha_telefono` TEXT)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id_lote` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `fecha_inventario` TEXT, `usuario_inventario` TEXT, `id_ubicacion_lote` INTEGER NOT NULL, `desc_ubicacion_lote` TEXT, `calle` INTEGER NOT NULL, `lote` TEXT, `estado` INTEGER NOT NULL, `fecha_telefono` TEXT, `imei` TEXT, `fecha_subida` TEXT)",
         "fields": [
           {
             "fieldPath": "idLotes",
@@ -87,6 +87,18 @@
             "columnName": "fecha_telefono",
             "affinity": "TEXT",
             "notNull": false
+          },
+          {
+            "fieldPath": "imei",
+            "columnName": "imei",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "fecha_subida",
+            "columnName": "fecha_subida",
+            "affinity": "TEXT",
+            "notNull": false
           }
         ],
         "primaryKey": {
@@ -101,7 +113,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, \"7605b032bf28fbdd6021d621d75e7ea5\")"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, \"153bb6f78397dcf37aa2f3a0f813aa4f\")"
     ]
   }
 }

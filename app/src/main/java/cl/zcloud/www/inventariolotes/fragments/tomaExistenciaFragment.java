@@ -20,6 +20,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Vibrator;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
@@ -76,11 +77,13 @@ public class tomaExistenciaFragment extends Fragment {
     private TextView lbl_mensaje;
 
     private String nombreUbicacion;
-    private int idUbic,estadoPantalla;
+    private int idUbic, estadoPantalla;
 
     ArrayList<String> descUbicacion;
     ArrayList<Integer> idUbicacion;
     ArrayAdapter<String> spinnerAdapter;
+
+    private String myIMEI;
 
 
 //    bluethooth
@@ -117,7 +120,7 @@ private static BluetoothDevice adress;
         super.onCreate(savedInstanceState);
     }
 
-    @SuppressLint("HandlerLeak")
+    @SuppressLint({"HandlerLeak", "HardwareIds"})
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -145,6 +148,7 @@ private static BluetoothDevice adress;
         alert = soundPool.load(Objects.requireNonNull(getActivity()), R.raw.alert, 1);
         incorrect = soundPool.load(Objects.requireNonNull(getActivity()), R.raw.incorrect, 1);
 
+        myIMEI  = Settings.Secure.getString(Objects.requireNonNull(getActivity()).getApplicationContext().getContentResolver(), Settings.Secure.ANDROID_ID);
 
 
         lote.addTextChangedListener(new TextWatcher() {
@@ -210,7 +214,6 @@ private static BluetoothDevice adress;
                     if (imm != null) {
                         imm.hideSoftInputFromWindow(lote.getApplicationWindowToken(), 0);
                     }
-                    /* Write your logic here that will be executed when user taps next button */
                     handled = true;
                 }
                 return handled;
@@ -360,115 +363,121 @@ private static BluetoothDevice adress;
             if (TextUtils.isEmpty(etPlannedDate.getText()) || TextUtils.isEmpty(usuario.getText()) || TextUtils.isEmpty(calle.getText()) || TextUtils.isEmpty(lote.getText())) {
                 Toasty.info(Objects.requireNonNull(getActivity()), "Debe completar todos los campos", Toast.LENGTH_LONG, true).show();
             } else {
-                lbl_mensaje.setText("");
-                lbl_mensaje.setBackgroundColor(getResources().getColor(R.color.whiteText));
-                lbl_mensaje.setTextColor(getResources().getColor(R.color.whiteText));
+                if(Integer.parseInt(calle.getText().toString()) <= 999) {
+                    lbl_mensaje.setText("");
+                    lbl_mensaje.setBackgroundColor(getResources().getColor(R.color.whiteText));
+                    lbl_mensaje.setTextColor(getResources().getColor(R.color.whiteText));
 
-                String REGULAR_EXPRESION = "([L]{2}[0]+[1-4]+[A-Z]{2}[0-9]{5})";
-                Pattern patron = Pattern.compile(REGULAR_EXPRESION);
-                String stLote = lote.getText().toString().trim();
-                if (patron.matcher(stLote).matches()) {
-                    SharedPreferences.Editor editor = sharedPref.edit();
-                    editor.putString("remember_fecha", etPlannedDate.getText().toString());
-                    editor.putString("remember_usuario", usuario.getText().toString());
-                    editor.putInt("remember_lugar", ubicacion.getSelectedItemPosition());
-                    editor.putInt("remember_calle", Integer.parseInt(calle.getText().toString()));
-                    editor.apply();
+                    String REGULAR_EXPRESION = "([L]{2}[0]+[1-4]+[A-Z]{2}[0-9]{5})";
+                    Pattern patron = Pattern.compile(REGULAR_EXPRESION);
+                    String stLote = lote.getText().toString().trim();
+                    if (patron.matcher(stLote).matches()) {
+                        SharedPreferences.Editor editor = sharedPref.edit();
+                        editor.putString("remember_fecha", etPlannedDate.getText().toString());
+                        editor.putString("remember_usuario", usuario.getText().toString());
+                        editor.putInt("remember_lugar", ubicacion.getSelectedItemPosition());
+                        editor.putInt("remember_calle", Integer.parseInt(calle.getText().toString()));
+                        editor.apply();
 
-                    String[] fechaAGuardar = TextUtils.split(etPlannedDate.getText().toString(), "-");
-                    final String fechaFinal = fechaAGuardar[2] + "-" + fechaAGuardar[1] + "-" + fechaAGuardar[0];
+                        String[] fechaAGuardar = TextUtils.split(etPlannedDate.getText().toString(), "-");
+                        final String fechaFinal = fechaAGuardar[2] + "-" + fechaAGuardar[1] + "-" + fechaAGuardar[0];
 
-                    AsyncTask.execute(new Runnable() {
-                        @Override
-                        public void run() {
-                            final List<Lotes> loteList = MainActivity.myAppDB.myDao().getLotesByLoteAndFecha(lote.getText().toString(), fechaFinal);
-                            Objects.requireNonNull(getActivity()).runOnUiThread(new Runnable() {
-                                @Override
-                                public void run() {
-                                    if (loteList.size() > 0) {
-                                        v = (Vibrator) Objects.requireNonNull(getActivity()).getSystemService(Context.VIBRATOR_SERVICE);
-                                        if (v != null) {
-                                            v.vibrate(400);
-                                        }
-                                        reproducirSound(alert);
+                        AsyncTask.execute(new Runnable() {
+                            @Override
+                            public void run() {
+                                final List<Lotes> loteList = MainActivity.myAppDB.myDao().getLotesByLoteAndFecha(lote.getText().toString(), fechaFinal);
+                                Objects.requireNonNull(getActivity()).runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        if (loteList.size() > 0) {
+                                            v = (Vibrator) Objects.requireNonNull(getActivity()).getSystemService(Context.VIBRATOR_SERVICE);
+                                            if (v != null) {
+                                                v.vibrate(400);
+                                            }
+                                            reproducirSound(alert);
 
-                                        lbl_mensaje.setBackgroundColor(getResources().getColor(R.color.warning));
-                                        lbl_mensaje.setTextColor(getResources().getColor(R.color.black));
-                                        String texto = "REPETIDO ! \nLote ya ingresado para este inventario\n"+ lote.getText();
-                                        lbl_mensaje.setText(texto);
-                                        lote.setText("");
+                                            lbl_mensaje.setBackgroundColor(getResources().getColor(R.color.warning));
+                                            lbl_mensaje.setTextColor(getResources().getColor(R.color.black));
+                                            String texto = "REPETIDO ! \nLote ya ingresado para este inventario\n" + lote.getText();
+                                            lbl_mensaje.setText(texto);
+                                            lote.setText("");
 //                                        Toasty.warning(Objects.requireNonNull(getActivity()), "Lote ya ingresado para este inventario", Toast.LENGTH_SHORT, true).show();
 
-                                        v = null;
-                                    } else {
-                                        SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss", Locale.getDefault());
-                                        Date da = new Date();
-                                        final String fechaFinalDispo = df.format(da);
+                                            v = null;
+                                        } else {
+                                            SimpleDateFormat df = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss", Locale.getDefault());
+                                            Date da = new Date();
+                                            final String fechaFinalDispo = df.format(da);
 
 
-                                        Lotes lotes = new Lotes();
-                                        lotes.setFechaDispo(fechaFinalDispo);
-                                        lotes.setCalle(Integer.parseInt(calle.getText().toString()));
-                                        lotes.setDescUbicacionLote(nombreUbicacion);
-                                        lotes.setFechaInventario(fechaFinal);
-                                        lotes.setIdUbicacionLote(idUbic);
-                                        lotes.setUsuarioInventario(usuario.getText().toString());
-                                        lotes.setLote(lote.getText().toString());
-                                        try {
-                                            long idLote = MainActivity.myAppDB.myDao().insertarLote(lotes);
-                                            if (idLote > 0) {
-                                                v = (Vibrator) Objects.requireNonNull(getActivity()).getSystemService(Context.VIBRATOR_SERVICE);
-                                                if (v != null) {
-                                                    v.vibrate(400);
+                                            Lotes lotes = new Lotes();
+                                            lotes.setFechaDispo(fechaFinalDispo);
+                                            lotes.setCalle(Integer.parseInt(calle.getText().toString()));
+                                            lotes.setDescUbicacionLote(nombreUbicacion);
+                                            lotes.setFechaInventario(fechaFinal);
+                                            lotes.setIdUbicacionLote(idUbic);
+                                            lotes.setEstado(0);
+                                            lotes.setUsuarioInventario(usuario.getText().toString());
+                                            lotes.setLote(lote.getText().toString());
+                                            lotes.setImei(myIMEI);
+                                            try {
+                                                long idLote = MainActivity.myAppDB.myDao().insertarLote(lotes);
+                                                if (idLote > 0) {
+                                                    v = (Vibrator) Objects.requireNonNull(getActivity()).getSystemService(Context.VIBRATOR_SERVICE);
+                                                    if (v != null) {
+                                                        v.vibrate(400);
+                                                    }
+                                                    reproducirSound(correct);
+
+                                                    lbl_mensaje.setBackgroundColor(getResources().getColor(R.color.success));
+                                                    lbl_mensaje.setTextColor(getResources().getColor(R.color.whiteText));
+                                                    lbl_mensaje.setText(R.string.mnsj_lbl_success);
+                                                    lote.setText("");
+                                                    SharedPreferences sharedPref = Objects.requireNonNull(getActivity()).getSharedPreferences("remember_me", MODE_PRIVATE);
+                                                    SharedPreferences.Editor editor = sharedPref.edit();
+                                                    editor.putInt("remember_calle", Integer.parseInt(calle.getText().toString()));
+                                                    editor.apply();
+                                                    v = null;
                                                 }
-                                                reproducirSound(correct);
-
-                                                lbl_mensaje.setBackgroundColor(getResources().getColor(R.color.success));
-                                                lbl_mensaje.setTextColor(getResources().getColor(R.color.whiteText));
-                                                lbl_mensaje.setText(R.string.mnsj_lbl_success);
-                                                lote.setText("");
-                                                SharedPreferences sharedPref = Objects.requireNonNull(getActivity()).getSharedPreferences("remember_me", MODE_PRIVATE);
-                                                SharedPreferences.Editor editor = sharedPref.edit();
-                                                editor.putInt("remember_calle", Integer.parseInt(calle.getText().toString()));
-                                                editor.apply();
-//                                                Toasty.success(Objects.requireNonNull(getActivity()), "OK!", Toast.LENGTH_SHORT, true).show();
-//                                                v.cancel();
-//                                                stop_mp();
-                                                v = null;
+                                            } catch (Exception e) {
+                                                e.printStackTrace();
                                             }
-                                        } catch (Exception e) {
-                                            e.printStackTrace();
                                         }
                                     }
-                                }
-                            });
+                                });
+                            }
+                        });
+                    } else {
+                        v = (Vibrator) Objects.requireNonNull(getActivity()).getSystemService(Context.VIBRATOR_SERVICE);
+                        if (v != null) {
+                            v.vibrate(400);
                         }
-                    });
-                } else {
+                        reproducirSound(incorrect);
+//                    play_sp(2);
+                        SharedPreferences.Editor editor = sharedPref.edit();
+                        editor.putString("remember_fecha", etPlannedDate.getText().toString());
+                        editor.putString("remember_usuario", usuario.getText().toString());
+                        editor.putInt("remember_lugar", ubicacion.getSelectedItemPosition());
+                        editor.putInt("remember_calle", Integer.parseInt(calle.getText().toString()));
+                        editor.putInt("remember_estado", 1);
+                        editor.putString("remember_lote", lote.getText().toString());
+                        editor.apply();
+
+                        lbl_mensaje.setBackgroundColor(getResources().getColor(R.color.danger));
+                        lbl_mensaje.setTextColor(getResources().getColor(R.color.whiteText));
+                        String texto = " ERROR! \nERROR DE FORMATO EN ETIQUETA\n" + lote.getText();
+                        lbl_mensaje.setText(texto);
+                        lote.setText("");
+                        showAlertForBloqueo();
+                        v = null;
+                    }
+                }else{
                     v = (Vibrator) Objects.requireNonNull(getActivity()).getSystemService(Context.VIBRATOR_SERVICE);
                     if (v != null) {
                         v.vibrate(400);
                     }
-                    reproducirSound(incorrect);
-//                    play_sp(2);
-                    SharedPreferences.Editor editor = sharedPref.edit();
-                    editor.putString("remember_fecha", etPlannedDate.getText().toString());
-                    editor.putString("remember_usuario", usuario.getText().toString());
-                    editor.putInt("remember_lugar", ubicacion.getSelectedItemPosition());
-                    editor.putInt("remember_calle", Integer.parseInt(calle.getText().toString()));
-                    editor.putInt("remember_estado", 1);
-                    editor.putString("remember_lote", lote.getText().toString());
-                    editor.apply();
-
-                    lbl_mensaje.setBackgroundColor(getResources().getColor(R.color.danger));
-                    lbl_mensaje.setTextColor(getResources().getColor(R.color.whiteText));
-                    String texto = " ERROR! \nERROR DE FORMATO EN ETIQUETA\n"+ lote.getText();
-                    lbl_mensaje.setText(texto);
-                    lote.setText("");
-//                    Toasty.error(Objects.requireNonNull(getActivity()), "ERROR DE FORMATO EN ETIQUETA", Toast.LENGTH_SHORT, true).show();
-                    showAlertForBloqueo();
-//                    v.cancel();
-//                    stop_mp();
+                    reproducirSound(alert);
+                    showAlertForCalle();
                     v = null;
                 }
             }
@@ -503,6 +512,36 @@ private static BluetoothDevice adress;
         newFragment.show(Objects.requireNonNull(getActivity()).getSupportFragmentManager(), "datePicker");
     }
 
+    private void showAlertForCalle(){
+        View viewInfalted = LayoutInflater.from(Objects.requireNonNull(getActivity())).inflate(R.layout.alert_empty,null);
+
+        final AlertDialog builder = new AlertDialog.Builder(Objects.requireNonNull(getActivity()))
+                .setView(viewInfalted)
+                .setTitle("Dato incorrecto")
+                .setMessage("Calle solo puede contener numeros menores o iguales a 999")
+                .setPositiveButton("Aceptar", new DialogInterface.OnClickListener(){
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                    }
+                }).create();
+
+        builder.setOnShowListener(new DialogInterface.OnShowListener() {
+            @Override
+            public void onShow(DialogInterface dialog) {
+                Button b = builder.getButton(AlertDialog.BUTTON_POSITIVE);
+                b.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        builder.dismiss();
+                    }
+                });
+            }
+        });
+        builder.setCancelable(false);
+        builder.show();
+    }
+
+
 
     private void showAlertForBloqueo(){
         View viewInfalted = LayoutInflater.from(Objects.requireNonNull(getActivity())).inflate(R.layout.alert_bloqueo,null);
@@ -514,7 +553,7 @@ private static BluetoothDevice adress;
 
         String[] fechaAGuardar = TextUtils.split(fActual, "-");
 
-        final int password = ((Integer.parseInt(fechaAGuardar[0]) * 4) - 3);
+        final int password = (Integer.parseInt(fechaAGuardar[0])+ 1);
 
         final AlertDialog builder = new AlertDialog.Builder(Objects.requireNonNull(getActivity()))
                 .setView(viewInfalted)

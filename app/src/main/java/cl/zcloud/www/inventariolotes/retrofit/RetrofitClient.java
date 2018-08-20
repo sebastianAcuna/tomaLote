@@ -9,8 +9,9 @@ public class RetrofitClient {
 
     public static Retrofit getClient(){
         if(retrofit==null){
+//            http://190.13.170.26/llasa_android/
             retrofit = new Retrofit.Builder()
-                    .baseUrl("192.168.1.11/llasa_android/")
+                    .baseUrl("http://190.13.170.26/llasa_android/")
                     .addConverterFactory(GsonConverterFactory.create())
                     .build();
         }
