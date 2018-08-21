@@ -284,7 +284,7 @@ public class listarRegistrosFragment extends Fragment {
                     editor.apply();
 
                     Class fragmentClass = detalleLoteFragment.class;
-                    cambiarFragment(fragmentClass);
+                    cambiarFragment(fragmentClass, "detalleLista");
                 }
             }, new AdaptadorDetalleListaLote.OnLongClickListener() {
                 @Override
@@ -302,7 +302,7 @@ public class listarRegistrosFragment extends Fragment {
         }
     }
 
-    public void cambiarFragment( Class fragmentClass){
+    public void cambiarFragment( Class fragmentClass, String tag){
         Fragment fragment = null;
         try {
             fragment = (Fragment) fragmentClass.newInstance();
@@ -311,7 +311,7 @@ public class listarRegistrosFragment extends Fragment {
         }
 
         FragmentManager fragmentManager = Objects.requireNonNull(getActivity()).getSupportFragmentManager();
-        fragmentManager.beginTransaction().replace(R.id.fragments_container, fragment).addToBackStack(null).commit();
+        fragmentManager.beginTransaction().replace(R.id.fragments_container, fragment, tag).addToBackStack("listarRegistros").commit();
 //        .addToBackStack(null)
     }
 

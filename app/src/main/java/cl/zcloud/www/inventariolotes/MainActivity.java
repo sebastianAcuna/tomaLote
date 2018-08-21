@@ -22,6 +22,7 @@ import org.w3c.dom.Text;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
@@ -72,8 +73,7 @@ public class MainActivity extends AppCompatActivity {
 
         setupDrawerContent(navigationView);
 
-        cambiarFragment(homeFragment.class);
-
+        cambiarFragment(homeFragment.class, "home");
     }
 
 
@@ -91,33 +91,40 @@ public class MainActivity extends AppCompatActivity {
     private void selectDrawerItem(MenuItem item){
 
         Class fragmentClass;
+        String tag;
         switch (item.getItemId()){
             case R.id.l_menu_inicio:
                 fragmentClass = homeFragment.class;
+                tag = "home";
                 break;
             case R.id.l_menu_toma_existencia:
                 fragmentClass = tomaExistenciaFragment.class;
+                tag = "tomaExistencia";
                 break;
 
             case R.id.l_menu_list_existencia:
                 fragmentClass = listarRegistrosFragment.class;
+                tag = "listarRegistros";
                 break;
 
             case R.id.l_menu_mant_ubic:
                 fragmentClass = mantenedorFragment.class;
+                tag = "mantenedor";
                 break;
 
             case R.id.l_menu_herr_admin:
                 fragmentClass = adminFragment.class;
+                tag = "admin";
                 break;
 
             default:
                 fragmentClass = homeFragment.class;
+                tag = "home";
                 break;
 
         }
 
-        cambiarFragment(fragmentClass);
+        cambiarFragment(fragmentClass, tag);
 
         item.setChecked(true);
         setTitle(item.getTitle());
@@ -125,7 +132,47 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    public void cambiarFragment( Class fragmentClass){
+    @Override
+    public void onBackPressed() {
+
+        Fragment frg = getVisibleFragment();
+        switch (Objects.requireNonNull(frg.getTag())){
+            case "home":
+                super.onBackPressed();
+                break;
+            case "tomaExistencia":
+                cambiarFragment(homeFragment.class, "home");
+                break;
+            case "listarRegistros":
+                cambiarFragment(homeFragment.class, "home");
+                break;
+            case "mantenedor":
+                cambiarFragment(homeFragment.class, "home");
+                break;
+            case "admin":
+                cambiarFragment(homeFragment.class, "home");
+                break;
+            default:
+                super.onBackPressed();
+                break;
+        }
+
+    }
+
+
+    public Fragment getVisibleFragment(){
+        FragmentManager fragmentManager = MainActivity.this.getSupportFragmentManager();
+        List<Fragment> fragments = fragmentManager.getFragments();
+        if(fragments != null){
+            for(Fragment fragment : fragments){
+                if(fragment != null && fragment.isVisible())
+                    return fragment;
+            }
+        }
+        return null;
+    }
+
+    public void cambiarFragment(Class fragmentClass, String tag){
         Fragment fragment = null;
         try {
             fragment = (Fragment) fragmentClass.newInstance();
@@ -134,7 +181,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         FragmentManager fragmentManager = getSupportFragmentManager();
-        fragmentManager.beginTransaction().replace(R.id.fragments_container, fragment).commit();
+        fragmentManager.beginTransaction().replace(R.id.fragments_container, fragment, tag).commit();
 //        .addToBackStack(null)
     }
 
@@ -161,6 +208,6 @@ public class MainActivity extends AppCompatActivity {
         if (v == null)
             return;
 
-        inputManager.hideSoftInputFromWindow(v.getWindowToken(), 0);
+        Objects.requireNonNull(inputManager).hideSoftInputFromWindow(v.getWindowToken(), 0);
     }
 }
