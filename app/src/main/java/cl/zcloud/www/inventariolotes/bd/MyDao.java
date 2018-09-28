@@ -15,7 +15,6 @@ import cl.zcloud.www.inventariolotes.clases.Ubicacion;
 public interface MyDao {
 
 //    UBICACION
-
     @Insert
     public long insertarUbicacion(Ubicacion ubicacion);
 

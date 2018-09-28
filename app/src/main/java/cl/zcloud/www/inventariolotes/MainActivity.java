@@ -37,6 +37,7 @@ import cl.zcloud.www.inventariolotes.fragments.tomaExistenciaFragment;
 public class MainActivity extends AppCompatActivity {
 
     private DrawerLayout mDrawerLayout;
+    NavigationView navigationView;
 
     public static MyAppDB myAppDB;
 
@@ -55,7 +56,7 @@ public class MainActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         mDrawerLayout = findViewById(R.id.left_menu_main);
-        NavigationView navigationView = findViewById(R.id.navigation_view);
+        navigationView = findViewById(R.id.navigation_view);
 
         TextView lblHeader = navigationView.getHeaderView(0).findViewById(R.id.titulo_img_header);
 
@@ -141,15 +142,19 @@ public class MainActivity extends AppCompatActivity {
                 super.onBackPressed();
                 break;
             case "tomaExistencia":
+                navigationView.setCheckedItem(R.id.l_menu_inicio);
                 cambiarFragment(homeFragment.class, "home");
                 break;
             case "listarRegistros":
+                navigationView.setCheckedItem(R.id.l_menu_inicio);
                 cambiarFragment(homeFragment.class, "home");
                 break;
             case "mantenedor":
+                navigationView.setCheckedItem(R.id.l_menu_inicio);
                 cambiarFragment(homeFragment.class, "home");
                 break;
             case "admin":
+                navigationView.setCheckedItem(R.id.l_menu_inicio);
                 cambiarFragment(homeFragment.class, "home");
                 break;
             default:
