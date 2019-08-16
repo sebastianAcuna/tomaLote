@@ -58,8 +58,6 @@ public class detalleLoteFragment extends Fragment {
         }else{
             listaLotes = MainActivity.myAppDB.myDao().getLotesByFechaUbicacionAndCalle(fecha, ubicacion, calle);
         }
-
-
         if (listaLotes.size()>0){
             recyclerView.setHasFixedSize(true);
             RecyclerView.LayoutManager lManager = new LinearLayoutManager(Objects.requireNonNull(getActivity()));
